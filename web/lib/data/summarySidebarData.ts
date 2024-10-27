@@ -10,34 +10,42 @@ const summarySidebarData: SummaryNavigation = {
     {
       title: "Introduction to AI",
       url: "https://example.com/ai-intro",
+      emoji: "🤖",
     },
     {
       title: "Machine Learning Basics",
       url: "https://example.com/ml-basics",
+      emoji: "🔥",
     },
     {
       title: "Deep Learning Overview",
       url: "https://example.com/deep-learning",
+      emoji: "💥",
     },
     {
       title: "Natural Language Processing",
       url: "https://example.com/nlp",
+      emoji: "📚",
     },
     {
       title: "Computer Vision Fundamentals",
       url: "https://example.com/computer-vision",
+      emoji: "🌄",
     },
     {
       title: "Ethical AI Principles",
       url: "https://example.com/ethical-ai",
+      emoji: "🌈",
     },
     {
       title: "AI Model Deployment",
       url: "https://example.com/ai-deployment",
+      emoji: "🚀",
     },
     {
       title: "Generative AI Models",
       url: "https://example.com/generative-ai",
+      emoji: "🌠",
     },
   ],
   history: [

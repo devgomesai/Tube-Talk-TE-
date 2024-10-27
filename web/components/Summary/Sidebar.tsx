@@ -30,6 +30,7 @@ import {
   MessageCircleQuestion,
   MoreHorizontal,
   Pin,
+  PinOff,
   Plus,
   Search,
   Settings2,
@@ -105,11 +106,6 @@ const data = {
       icon: Home,
     },
     {
-      title: "Pinned",
-      url: "#",
-      icon: Pin,
-    },
-    {
       title: "Search",
       url: "#",
       icon: Search,
@@ -165,109 +161,44 @@ const data = {
   ],
   pinned: [
     {
-      name: "Personal Life Management",
-      emoji: "🏠",
-      pages: [
-        {
-          name: "Daily Journal & Reflection",
-          url: "#",
-          emoji: "📔",
-        },
-        {
-          name: "Health & Wellness Tracker",
-          url: "#",
-          emoji: "🍏",
-        },
-        {
-          name: "Personal Growth & Learning Goals",
-          url: "#",
-          emoji: "🌟",
-        },
-      ],
+      title: "Introduction to AI",
+      url: "https://example.com/ai-intro",
+      emoji: "🤖",
     },
     {
-      name: "Professional Development",
-      emoji: "💼",
-      pages: [
-        {
-          name: "Career Objectives & Milestones",
-          url: "#",
-          emoji: "🎯",
-        },
-        {
-          name: "Skill Acquisition & Training Log",
-          url: "#",
-          emoji: "🧠",
-        },
-        {
-          name: "Networking Contacts & Events",
-          url: "#",
-          emoji: "🤝",
-        },
-      ],
+      title: "Machine Learning Basics",
+      url: "https://example.com/ml-basics",
+      emoji: "🔥",
     },
     {
-      name: "Creative Projects",
-      emoji: "🎨",
-      pages: [
-        {
-          name: "Writing Ideas & Story Outlines",
-          url: "#",
-          emoji: "✍️",
-        },
-        {
-          name: "Art & Design Portfolio",
-          url: "#",
-          emoji: "🖼️",
-        },
-        {
-          name: "Music Composition & Practice Log",
-          url: "#",
-          emoji: "🎵",
-        },
-      ],
+      title: "Deep Learning Overview",
+      url: "https://example.com/deep-learning",
+      emoji: "💥",
     },
     {
-      name: "Home Management",
-      emoji: "🏡",
-      pages: [
-        {
-          name: "Household Budget & Expense Tracking",
-          url: "#",
-          emoji: "💰",
-        },
-        {
-          name: "Home Maintenance Schedule & Tasks",
-          url: "#",
-          emoji: "🔧",
-        },
-        {
-          name: "Family Calendar & Event Planning",
-          url: "#",
-          emoji: "📅",
-        },
-      ],
+      title: "Natural Language Processing",
+      url: "https://example.com/nlp",
+      emoji: "📚",
     },
     {
-      name: "Travel & Adventure",
-      emoji: "🧳",
-      pages: [
-        {
-          name: "Trip Planning & Itineraries",
-          url: "#",
-          emoji: "🗺️",
-        },
-        {
-          name: "Travel Bucket List & Inspiration",
-          url: "#",
-          emoji: "🌎",
-        },
-        {
-          name: "Travel Journal & Photo Gallery",
-          url: "#",
-          emoji: "📸",
-        },
-      ],
+      title: "Computer Vision Fundamentals",
+      url: "https://example.com/computer-vision",
+      emoji: "🌄",
+    },
+    {
+      title: "Ethical AI Principles",
+      url: "https://example.com/ethical-ai",
+      emoji: "🌈",
+    },
+    {
+      title: "AI Model Deployment",
+      url: "https://example.com/ai-deployment",
+      emoji: "🚀",
+    },
+    {
+      title: "Generative AI Models",
+      url: "https://example.com/generative-ai",
+      emoji: "🌠",
     },
   ],
   actions: [
@@ -337,12 +268,12 @@ const data = {
 export default function SummarySidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r-0" {...props} collapsible="icon" variant="inset">
-      <SidebarHeader>
-        <NavMain items={data.navMain} />
+      <SidebarHeader className="bg-background rounded-lg p-2 mb-2">
+        <Nav items={data.navMain} />
       </SidebarHeader>
-      <SidebarContent>
-        <NavWorkspaces workspaces={data.pinned} />
-        <NavFavorites chatHistory={data.history} />
+      <SidebarContent className="no-scrollbar">
+        <PinnedChats pinned={data.pinned} />
+        <ChatHistory chatHistory={data.history} />
       </SidebarContent>
       <SidebarRail />
       <SidebarFooter>
@@ -414,11 +345,11 @@ function NavActions({
   )
 }
 
-function NavFavorites({ chatHistory }: { chatHistory: ChatItemType[] }) {
+function ChatHistory({ chatHistory }: { chatHistory: ChatItemType[] }) {
   const { isMobile } = useSidebar()
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup className="group-data-[collapsible=icon]:hidden bg-background rounded-lg">
       <SidebarGroupLabel>History</SidebarGroupLabel>
       <SidebarMenu>
         {chatHistory.map((chat) => (
@@ -474,7 +405,7 @@ function NavFavorites({ chatHistory }: { chatHistory: ChatItemType[] }) {
 }
 
 
-function NavMain({
+function Nav({
   items,
 }: {
   items: {
@@ -488,13 +419,13 @@ function NavMain({
 
   return (
     <SidebarMenu className={`w-${isOpen ? '64' : '10'}`}>
-      <div className={`grid ${isOpen ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+      <div className={`grid ${isOpen ? 'grid-cols-3' : 'grid-cols-1'} gap-2`}>
         {items.map((item) => (
           <Tooltip key={item.title}>
             <TooltipTrigger asChild>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={item.isActive}>
-                  <a href={item.url} className="flex items-center justify-center bg-muted h-14">
+                  <a href={item.url} className="flex items-center justify-center bg-muted aspect-square h-16">
                     <item.icon className="w-full h-auto" />
                   </a>
                 </SidebarMenuButton>
@@ -508,66 +439,60 @@ function NavMain({
   )
 }
 
-function NavWorkspaces({
-  workspaces,
+function PinnedChats({
+  pinned,
 }: {
-  workspaces: {
-    name: string
-    emoji: React.ReactNode
-    pages: {
-      name: string
-      emoji: React.ReactNode
-    }[]
-  }[]
+  pinned: ChatItemType[]
 }) {
+  const { isMobile } = useSidebar()
   return (
-    <SidebarGroup>
+    <SidebarGroup className="bg-background rounded-lg">
       <SidebarGroupLabel>Pinned</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {workspaces.map((workspace) => (
-            <Collapsible key={workspace.name}>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="#">
-                    <span>{workspace.emoji}</span>
-                    <span>{workspace.name}</span>
-                  </a>
-                </SidebarMenuButton>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuAction
-                    className="left-2 bg-sidebar-accent text-sidebar-accent-foreground data-[state=open]:rotate-90"
-                    showOnHover
-                  >
-                    <ChevronRight />
+          {pinned.map((chat) => (
+            <SidebarMenuItem key={chat.title}>
+              <SidebarMenuButton asChild>
+                <a href="#">
+                  <span>{chat.emoji}</span>
+                  <span>{chat.title}</span>
+                </a>
+              </SidebarMenuButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuAction showOnHover>
+                    <MoreHorizontal />
+                    <span className="sr-only">More</span>
                   </SidebarMenuAction>
-                </CollapsibleTrigger>
-                <SidebarMenuAction showOnHover>
-                  <Plus />
-                </SidebarMenuAction>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {workspace.pages.map((page) => (
-                      <SidebarMenuSubItem key={page.name}>
-                        <SidebarMenuSubButton asChild>
-                          <a href="#">
-                            <span>{page.emoji}</span>
-                            <span>{page.name}</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 rounded-lg"
+                  side={isMobile ? "bottom" : "right"}
+                  align={isMobile ? "end" : "start"}
+                >
+                  <DropdownMenuItem>
+                    <PinOff className="text-muted-foreground" />
+                    <span>Unpin</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link className="text-muted-foreground" />
+                    <span>Copy Link</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <ArrowUpRight className="text-muted-foreground" />
+                    <span>Open in New Tab</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Trash2 className="text-muted-foreground" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+            </SidebarMenuItem>
           ))}
-          <SidebarMenuItem>
-            <SidebarMenuButton className="text-sidebar-foreground/70">
-              <MoreHorizontal />
-              <span>More</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
