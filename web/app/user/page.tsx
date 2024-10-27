@@ -20,7 +20,7 @@ export default function Page() {
     return <Dashboard />; // Render Component1 if no queries are passed
   } else if (platform && videoId) {
     return <Summary />; // Render Component3 if both platform and id are passed
-  } else if (!platform && videoId) {
+  } else {
     // Ensure 'id' is never passed without 'platform'
     return <div>Error: 'id' cannot be passed without 'platform'.</div>;
   }

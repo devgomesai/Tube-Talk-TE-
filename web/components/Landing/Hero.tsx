@@ -63,15 +63,15 @@ export default function Hero() {
           >
             <Button variant="outline" className="gap-2 p-2 hover:bg-primary/5 border-border/40">
               <Video className="h-5 w-5" />
-              <span>Read Transcript</span>
+              <span>Tubetalk</span>
+            </Button>
+            <Button variant="outline" className="gap-2 p-2 hover:bg-primary/5 border-border/40">
+              <Video className="h-5 w-5" />
+              <span>Rick Roll</span>
             </Button>
             <Button variant="outline" className="gap-2 p-2 hover:bg-primary/5 border-border/40">
               <Video className="h-5 w-5" />
               <span>Me at Zoo</span>
-            </Button>
-            <Button variant="outline" className="gap-2 p-2 hover:bg-primary/5 border-border/40">
-              <Video className="h-5 w-5" />
-              <span>TubeTalk</span>
             </Button>
           </motion.div>
         </motion.div>

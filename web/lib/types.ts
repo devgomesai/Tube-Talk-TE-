@@ -11,6 +11,7 @@ type PlatformMap = {
 type ChatItemType = {
   title: string,
   url: string,
+  emoji?: string
 }
 
 type UserDetails = {

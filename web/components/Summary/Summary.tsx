@@ -12,7 +12,7 @@ import summarySidebarData from "@/lib/data/summarySidebarData";
 export default function Summary() {
   return (
     <SidebarProvider className="flex h-screen overflow-hidden">
-      <SummarySidebar data={summarySidebarData} />
+      <SummarySidebar />
 
       <SidebarInset className="flex flex-col min-h-0">
         <VideoSummaryPartition />
