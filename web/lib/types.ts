@@ -7,6 +7,28 @@ type PlatformMap = {
   }
 };
 
+
+type ChatItemType = {
+  title: string,
+  url: string,
+}
+
+type UserDetails = {
+  name: string,
+  email: string,
+  avatar: string,
+}
+
+type SummaryNavigation = {
+  user: UserDetails,
+  pins?: ChatItemType[],
+  history: ChatItemType[],
+  configs?: any[],
+}
+
 export type {
-  PlatformMap
+  PlatformMap,
+  SummaryNavigation,
+  ChatItemType,
+  UserDetails,
 }

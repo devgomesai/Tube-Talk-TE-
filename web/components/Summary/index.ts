@@ -1,13 +1,13 @@
 import Summary from "./Summary";
-import InsetSidebar from "./InsetSidebar";
-import SummaryPartition from "./SummaryPartition";
+import VideoSummaryPartition from "./VideoSummaryPartition";
+import SummarySidebar from "./Sidebar";
 import ChatPartition from "./ChatPartition";
 
 export default Summary
 
 export {
-  InsetSidebar,
   ChatPartition,
-  SummaryPartition,
+  SummarySidebar,
+  VideoSummaryPartition,
 }
 

@@ -1,29 +1,26 @@
 "use client"
 
 import {
-  Send,
-} from "lucide-react"
-
-import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-import InsetSidebar from "./InsetSidebar";
-import SummaryPartition from "./SummaryPartition";
+import SummarySidebar from "./Sidebar";
+import VideoSummaryPartition from "./VideoSummaryPartition";
 import ChatPartition from "./ChatPartition";
+import summarySidebarData from "@/lib/data/summarySidebarData";
 
 export default function Summary() {
   return (
-    <SidebarProvider>
-      <InsetSidebar />
-      <SidebarInset>
-        <SummaryPartition />
+    <SidebarProvider className="flex h-screen overflow-hidden">
+      <SummarySidebar data={summarySidebarData} />
+
+      <SidebarInset className="flex flex-col min-h-0">
+        <VideoSummaryPartition />
       </SidebarInset>
 
-      <SidebarInset>
+      <SidebarInset className="flex flex-col min-h-0">
         <ChatPartition />
       </SidebarInset>
-    </SidebarProvider >
+    </SidebarProvider>
   )
 }
-

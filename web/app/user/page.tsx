@@ -1,7 +1,6 @@
 "use client";
 
 import Dashboard from '@/components/Dashboard';
-import Platform from '@/components/Platform';
 import Summary from '@/components/Summary';
 import { useSearchParams } from 'next/navigation';
 
@@ -19,8 +18,6 @@ export default function Page() {
   // Logic to render components based on the query parameters
   if (!platform && !videoId) {
     return <Dashboard />; // Render Component1 if no queries are passed
-  } else if (platform && !videoId) {
-    return <Platform />; // Render Component2 if only platform is passed
   } else if (platform && videoId) {
     return <Summary />; // Render Component3 if both platform and id are passed
   } else if (!platform && videoId) {
