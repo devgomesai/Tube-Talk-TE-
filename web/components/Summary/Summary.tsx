@@ -3,6 +3,7 @@
 import {
   SidebarInset,
   SidebarProvider,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import SummarySidebar from "./Sidebar";
 import VideoSummaryPartition from "./VideoSummaryPartition";
@@ -12,15 +13,27 @@ import summarySidebarData from "@/lib/data/summarySidebarData";
 export default function Summary() {
   return (
     <SidebarProvider className="flex h-screen overflow-hidden">
+      <SummaryContent />
+    </SidebarProvider>
+  )
+}
+
+function SummaryContent() {
+  const { isMobile } = useSidebar()
+  return (
+    <>
       <SummarySidebar />
 
       <SidebarInset className="flex flex-col min-h-0">
         <VideoSummaryPartition />
+        {isMobile && <ChatPartition />}
       </SidebarInset>
 
-      <SidebarInset className="flex flex-col min-h-0">
-        <ChatPartition />
-      </SidebarInset>
-    </SidebarProvider>
+      {!isMobile && (
+        <SidebarInset className="flex flex-col min-h-0">
+          <ChatPartition />
+        </SidebarInset>
+      )}
+    </>
   )
 }

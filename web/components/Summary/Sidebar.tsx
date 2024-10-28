@@ -102,7 +102,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/user",
       icon: Home,
     },
     {
@@ -418,15 +418,15 @@ function Nav({
   const { open: isOpen } = useSidebar()
 
   return (
-    <SidebarMenu className={`w-${isOpen ? '64' : '10'}`}>
+    <SidebarMenu className="w-auto">
       <div className={`grid ${isOpen ? 'grid-cols-3' : 'grid-cols-1'} gap-2`}>
         {items.map((item) => (
           <Tooltip key={item.title}>
             <TooltipTrigger asChild>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={item.isActive}>
-                  <a href={item.url} className="flex items-center justify-center bg-muted aspect-square h-16">
-                    <item.icon className="w-full h-auto" />
+                <SidebarMenuButton asChild isActive={item.isActive} className="h-16">
+                  <a href={item.url} className="flex items-center justify-center bg-muted">
+                    <item.icon className="w-8 h-8" />
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -453,7 +453,7 @@ function PinnedChats({
           {pinned.map((chat) => (
             <SidebarMenuItem key={chat.title}>
               <SidebarMenuButton asChild>
-                <a href="#">
+                <a href={chat.url}>
                   <span>{chat.emoji}</span>
                   <span>{chat.title}</span>
                 </a>
@@ -484,10 +484,6 @@ function PinnedChats({
                     <span>Open in New Tab</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Trash2 className="text-muted-foreground" />
-                    <span>Delete</span>
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
