@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { ArrowRight, MousePointerClick, Video } from "lucide-react";
-import { Input } from "../ui/input";
+import { Input } from "../aceternity/input";
 import { Button } from "../ui/button";
 
 export default function Hero() {
