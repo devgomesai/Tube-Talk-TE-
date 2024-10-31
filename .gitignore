@@ -1,3 +1,13 @@
 .next
+
 web/.env
 web/bun.lockb
+web/package-lock.json
+
+backend/.env
+backend/myenv
+backend/.venv
+backend/env
+
+backend/__pycache__
+backend/faiss_index

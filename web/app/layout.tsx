@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,6 +24,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster theme="dark" closeButton={true} />
         </ThemeProvider>
       </body>
     </html>

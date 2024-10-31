@@ -1,0 +1,8 @@
+streamlit
+langchain
+faiss-cpu
+yt-dlp
+assemblyai
+openai
+python-dotenv
+audio-transcript

@@ -424,9 +424,9 @@ function Nav({
           <Tooltip key={item.title}>
             <TooltipTrigger asChild>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={item.isActive} className="h-16">
+                <SidebarMenuButton asChild isActive={item.isActive} className="h-16 group/nav hover:bg-background">
                   <a href={item.url} className="flex items-center justify-center bg-muted">
-                    <item.icon className="w-8 h-8" />
+                    <item.icon className="w-8 h-8 group-hover/nav:text-primary" />
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
