@@ -1,0 +1,184 @@
+# TubeTalk Video Summarizer Architecture
+direction: right
+
+# Frontend Components
+frontend: {
+  label: "Frontend (Next.js)"
+  style: {
+    stroke: blue
+  }
+
+  extension: {
+    label: "Chrome Extension"
+    style.multiple: true
+
+    actions: {
+      label: "Video Actions"
+      video_detection: "Detect YouTube Video"
+      launch_dashboard: "Launch Dashboard"
+      request_summary: "Request Summary"
+    }
+  }
+
+  web_app: {
+    label: "Web Application"
+    style.multiple: true
+
+    components: {
+      input_handler: "Video URL Input Handler"
+      summary_view: "Summary Display"
+      chat_interface: "Chat Interface"
+      auth_portal: "Authentication Portal"
+    }
+
+    auth_flow: {
+      auth_check: "Authentication Check" {
+        style.fill: lightgreen
+      }
+      user_access: "Full Access" {
+        label: "Authenticated User Access\n• Summary\n• Chat Interface\n• History"
+        style.fill: "#90EE90"
+      }
+      guest_access: "Limited Access" {
+        label: "Guest Access\n• Summary\n• ❌ Chat\n• ❌ History"
+        style.fill: "#FFB6C1"
+      }
+
+      auth_check -> user_access: "User"
+      auth_check -> guest_access: "Guest"
+    }
+  }
+}
+
+# Backend Services
+backend: {
+  label: "Backend Services"
+  style: {
+    stroke: green
+  }
+
+  api_gateway: {
+    label: "API Gateway"
+    request_handler: "Request Router"
+    rate_limiter: "Rate Limiting"
+    auth_middleware: "Auth Middleware"
+  }
+
+  transcript_service: {
+    label: "Transcript Service"
+    style.multiple: true
+
+    primary: {
+      label: "YouTube Transcript API"
+      scraper: "Transcript Scraper"
+      parser: "Transcript Parser"
+    }
+
+    fallback: {
+      label: "Audio Transcription (AssemblyAI)"
+      audio_extractor: "YT-DLP Audio Extractor"
+      audio_processor: "Audio Processing"
+      speech_to_text: "Speech-to-Text API"
+    }
+  }
+
+  llm_service: {
+    label: "LLM Service (Gemini AI)"
+    style.multiple: true
+
+    processors: {
+      summarizer: "Summary Generator"
+      chat_handler: "Chat Response Generator" {
+        style.fill: "#87CEEB"
+      }
+      context_manager: "Context Management"
+    }
+  }
+}
+
+# Database Layer
+database: {
+  label: "PocketBase Database"
+  style: {
+    stroke: orange
+  }
+
+  collections: {
+    users: "Users Collection"
+    summaries: "Video Summaries"
+    transcripts: "Transcripts"
+    chat_history: "Chat History" {
+      style.fill: "#87CEEB"
+    }
+  }
+
+  cache: {
+    label: "Cache Layer"
+    summary_cache: "Summary Cache"
+    transcript_cache: "Transcript Cache"
+  }
+}
+
+# Core Relationships
+frontend.extension.actions -> frontend.web_app: "Redirect & Data"
+frontend.web_app -> backend.api_gateway: "API Requests" {
+  style: {
+    stroke: blue
+    stroke-dash: 3
+  }
+}
+
+backend.api_gateway -> backend.transcript_service.primary: "Transcript Request" {
+  style: {
+    stroke: green
+  }
+}
+
+backend.transcript_service.primary -> backend.transcript_service.fallback: "Fallback on Failure" {
+  style: {
+    stroke: red
+    stroke-dash: 5
+  }
+}
+
+backend.transcript_service -> backend.llm_service: "Process Content" {
+  style: {
+    stroke: purple
+  }
+}
+
+backend.llm_service -> database: "Store Results" {
+  style: {
+    stroke: orange
+  }
+}
+
+database -> frontend.web_app: "Fetch Data" {
+  style: {
+    stroke: blue
+    stroke-dash: 3
+  }
+}
+
+# Access Control Flows
+backend.api_gateway -> backend.llm_service.processors.chat_handler: "Auth Required" {
+  style: {
+    stroke: "#87CEEB"
+    stroke-dash: 5
+  }
+}
+
+backend.api_gateway -> database.collections.chat_history: "Auth Required" {
+  style: {
+    stroke: "#87CEEB"
+    stroke-dash: 5
+  }
+}
+
+# Error Handling & Validation Flows
+backend.api_gateway -> database: "Validate & Cache" {
+  style: {
+    stroke: "#666"
+    stroke-dash: 5
+  }
+}
