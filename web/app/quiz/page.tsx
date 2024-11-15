@@ -9,40 +9,61 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { CheckCircle2, XCircle } from 'lucide-react'
 
-// Quiz data
-const quizData = [
-  {
-    question: "What is the capital of France?",
-    options: ["London", "Berlin", "Paris", "Madrid"],
-    answer: "Paris"
-  },
-  {
-    question: "Which planet is known as the Red Planet?",
-    options: ["Mars", "Venus", "Jupiter", "Saturn"],
-    answer: "Mars"
-  },
-  {
-    question: "Who painted the Mona Lisa?",
-    options: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Michelangelo"],
-    answer: "Leonardo da Vinci"
-  }
-]
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  answer: string;
+}
+
+interface Quiz {
+  questions: QuizQuestion[];
+}
 
 enum Params {
   platform = "platform",
   id = "id"
 }
 
-export default function Component() {
+export default function QuizComponent() {
   const searchParams = useSearchParams();
   const platform = searchParams.get(Params.platform);
   const videoId = searchParams.get(Params.id);
+  const router = useRouter()
+
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [isAnswered, setIsAnswered] = useState(false)
   const [score, setScore] = useState(0)
   const [quizCompleted, setQuizCompleted] = useState(false)
-  const router = useRouter()
+
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const response = await fetch(`/api/v1/quiz?platform=${platform}&id=${videoId}`);
+        const data = await response.json();
+
+        if (data.status === 'success' && data.quiz) {
+          setQuiz(data.quiz);
+        } else {
+          setError(data.message || 'Failed to load quiz');
+        }
+      } catch (err) {
+        setError('Failed to fetch quiz');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (platform && videoId) {
+      fetchQuiz();
+    } else {
+      setError('Missing platform or video ID');
+      setLoading(false);
+    }
+  }, [platform, videoId]);
 
   useEffect(() => {
     if (quizCompleted) {
@@ -52,21 +73,21 @@ export default function Component() {
         } else {
           router.push('/user')
         }
-      }, 3000) // Redirect after 3 seconds
+      }, 3000)
 
       return () => clearTimeout(redirectTimer)
     }
-  }, [quizCompleted, router])
+  }, [quizCompleted, router, platform, videoId])
 
   const handleSubmit = () => {
-    if (selectedAnswer === quizData[currentQuestion].answer) {
+    if (quiz && selectedAnswer === quiz.questions[currentQuestion].answer) {
       setScore(score + 1)
     }
     setIsAnswered(true)
   }
 
   const handleNext = () => {
-    if (currentQuestion < quizData.length - 1) {
+    if (quiz && currentQuestion < quiz.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
       setSelectedAnswer('')
       setIsAnswered(false)
@@ -75,7 +96,34 @@ export default function Component() {
     }
   }
 
-  const isLastQuestion = currentQuestion === quizData.length - 1
+  if (loading) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardContent className="py-8">
+          <p className="text-center text-muted-foreground">Loading quiz...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardContent className="py-8">
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!quiz) {
+    return null;
+  }
+
+  const isLastQuestion = currentQuestion === quiz.questions.length - 1
 
   return (
     <Card className="w-full max-w-lg mx-auto">
@@ -85,29 +133,36 @@ export default function Component() {
       <CardContent>
         {!quizCompleted ? (
           <>
-            <h2 className="text-xl font-bold mb-4 text-primary">{quizData[currentQuestion].question}</h2>
+            <h2 className="text-xl font-bold mb-4 text-primary">
+              {quiz.questions[currentQuestion].question}
+            </h2>
             <RadioGroup value={selectedAnswer} onValueChange={setSelectedAnswer}>
-              {quizData[currentQuestion].options.map((option, index) => (
+              {quiz.questions[currentQuestion].options.map((option, index) => (
                 <div key={index} className="flex items-center space-x-2 mb-2">
                   <RadioGroupItem value={option} id={`option-${index}`} disabled={isAnswered} />
-                  <Label htmlFor={`option-${index}`} className="text-secondary-foreground">{option}</Label>
+                  <Label htmlFor={`option-${index}`} className="text-secondary-foreground">
+                    {option}
+                  </Label>
                 </div>
               ))}
             </RadioGroup>
             {isAnswered && (
-              <Alert variant={selectedAnswer === quizData[currentQuestion].answer ? "default" : "destructive"} className="mt-4">
-                {selectedAnswer === quizData[currentQuestion].answer ? (
+              <Alert
+                variant={selectedAnswer === quiz.questions[currentQuestion].answer ? "default" : "destructive"}
+                className="mt-4"
+              >
+                {selectedAnswer === quiz.questions[currentQuestion].answer ? (
                   <CheckCircle2 className="h-4 w-4" />
                 ) : (
                   <XCircle className="h-4 w-4" />
                 )}
                 <AlertTitle>
-                  {selectedAnswer === quizData[currentQuestion].answer ? 'Correct!' : 'Incorrect!'}
+                  {selectedAnswer === quiz.questions[currentQuestion].answer ? 'Correct!' : 'Incorrect!'}
                 </AlertTitle>
                 <AlertDescription>
-                  {selectedAnswer === quizData[currentQuestion].answer
+                  {selectedAnswer === quiz.questions[currentQuestion].answer
                     ? 'Great job!'
-                    : `The correct answer is: ${quizData[currentQuestion].answer}`}
+                    : `The correct answer is: ${quiz.questions[currentQuestion].answer}`}
                 </AlertDescription>
               </Alert>
             )}
@@ -115,7 +170,9 @@ export default function Component() {
         ) : (
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4 text-primary">Quiz Completed!</h2>
-            <p className="text-xl mb-4 text-secondary-foreground">Your score: {score} out of {quizData.length}</p>
+            <p className="text-xl mb-4 text-secondary-foreground">
+              Your score: {score} out of {quiz.questions.length}
+            </p>
             <p className="text-muted-foreground">Redirecting to user page in 3 seconds...</p>
           </div>
         )}

@@ -9,12 +9,10 @@ import (
 
 // Quiz represents the structure of the quiz returned by the server
 type Quiz struct {
-	Title     string `json:"title"`
 	Questions []struct {
-		ID            int      `json:"id"`
 		Question      string   `json:"question"`
 		Options       []string `json:"options"`
-		CorrectAnswer string   `json:"correct_answer"`
+		CorrectAnswer string   `json:"answer"`
 	} `json:"questions"`
 }
 
@@ -31,54 +29,34 @@ type InitQuizResponse struct {
 }
 
 func initQuizHandler(w http.ResponseWriter, r *http.Request) {
-	// Parse the incoming request body
-	var req InitQuizRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	// Simulate quiz generation based on the transcript
-	if req.Transcript == "" {
-		http.Error(w, "Transcript is required", http.StatusBadRequest)
-		return
-	}
-
 	// Generate a dummy quiz
 	quiz := Quiz{
-		Title: "Basic Programming Concepts",
 		Questions: []struct {
-			ID            int      `json:"id"`
 			Question      string   `json:"question"`
 			Options       []string `json:"options"`
-			CorrectAnswer string   `json:"correct_answer"`
+			CorrectAnswer string   `json:"answer"`
 		}{
 			{
-				ID:            1,
 				Question:      "What does HTML stand for?",
 				Options:       []string{"HyperText Markup Language", "HighText Machine Language", "HyperText Management Language", "None of the above"},
 				CorrectAnswer: "HyperText Markup Language",
 			},
 			{
-				ID:            2,
 				Question:      "Which programming language is commonly used for web development?",
 				Options:       []string{"Python", "JavaScript", "C++", "Java"},
 				CorrectAnswer: "JavaScript",
 			},
 			{
-				ID:            3,
 				Question:      "What is the correct syntax for a for loop in Python?",
 				Options:       []string{"for(i=0; i<10; i++)", "for i in range(10):", "for i: range(10)", "loop i in range(10):"},
 				CorrectAnswer: "for i in range(10):",
 			},
 			{
-				ID:            4,
 				Question:      "Which symbol is used for comments in JavaScript?",
 				Options:       []string{"//", "/* */", "#", "--"},
 				CorrectAnswer: "//",
 			},
 			{
-				ID:            5,
 				Question:      "What does CSS stand for?",
 				Options:       []string{"Cascading Style Sheets", "Creative Style System", "Computer Style Sheets", "Control Style Syntax"},
 				CorrectAnswer: "Cascading Style Sheets",
