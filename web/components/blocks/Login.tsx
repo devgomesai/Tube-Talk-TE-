@@ -38,7 +38,7 @@ export function LoginFormDemo() {
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
-      <div className="flex items-center mb-4" onClick={() => window.history.back()}>
+      <div className="flex items-center mb-4 cursor-pointer" onClick={() => window.history.back()}>
         <ChevronLeft className="h-6 w-6 text-neutral-800 dark:text-neutral-300" />
         <span className="text-neutral-700 dark:text-neutral-300 text-sm">Back</span>
       </div>

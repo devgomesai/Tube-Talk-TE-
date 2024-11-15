@@ -1,6 +1,7 @@
 import { ArrowRight, Youtube } from "lucide-react";
 import { Button } from "../ui/button";
 import { ModeToggle } from "@/components/theme/mode-toggle";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
@@ -14,9 +15,9 @@ export default function Navbar() {
         <div className="flex items-center space-x-4">
           <Button variant="ghost" className="hidden md:inline-flex">About</Button>
           <Button variant="ghost" className="hidden md:inline-flex">Contact</Button>
-          <Button variant="default" className="gap-2 shadow-sm">
+          <Link href="/auth/login" className="flex bg-primary py-2 px-4 rounded-md items-center gap-2">
             Sign Up<ArrowRight className="h-4 w-4" />
-          </Button>
+          </Link>
           <ModeToggle />
         </div>
       </nav>
