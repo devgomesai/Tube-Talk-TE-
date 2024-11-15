@@ -148,13 +148,15 @@ class YouTube:
             return None
 
         prompt = f"""
-        "I have a YouTube video transcript:
-        transcript: {self.transcript}
-        Title: {self.title}
-        Please summarize the content in a clear and concise manner, highlighting the main points and key takeaways.
-        Ensure the summary captures the essence of the video without missing any critical details.
-        Aim for a summary that is no more than 100 words.
-        Start with the title and then the summary part"
+        "Please provide a concise and clear summary of the following YouTube video transcript:
+            Title: {self.title}
+            Transcript: {self.transcript}
+            Your summary should:
+            Begin with the title of the video.
+            Summarize the key points and main takeaways from the transcript.
+            Ensure that the essence of the video is captured, focusing on the most important information.
+            Keep the summary under 100 words, ensuring it remains both informative and concise.
+            Avoid including unnecessary details while making sure no critical points are left out"
         """
         try:
             response = self.llm.invoke(prompt)
