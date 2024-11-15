@@ -11,7 +11,7 @@ export default function Hero() {
   const handleSubmit = (event:React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault(); 
 
-    fetch("http://127.0.0.1:5000/your-backend-endpoint", {
+    fetch("http://127.0.0.1:5000/transcript", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
