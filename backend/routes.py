@@ -51,11 +51,13 @@ def chat():
         return jsonify({"status": "success", "answer": answer})
     return jsonify({"status": "error", "message": "Vector store not initialized or no question provided."}), 400
 
-@app.route("/init-quiz", methods=["POST"])
+@app.route("/init-quiz", methods=["GET"])
 def init_quiz():
     if youtube.transcript:
         quiz = youtube.generate_quiz() 
-        return jsonify({"status": "success", "quiz": quiz})
+        if quiz:
+            return jsonify({"status": "success", "quiz": quiz})  
+        return jsonify({"status": "error", "message": "Failed to generate quiz."}), 400
     return jsonify({"status": "error", "message": "Transcript not available."}), 400
 
 @app.route("/ans", methods=["POST"])

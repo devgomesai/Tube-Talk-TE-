@@ -1,5 +1,7 @@
 import os
 import re
+import json
+import logging
 from typing import Tuple, Optional, List, Dict
 from dataclasses import dataclass
 import random
@@ -28,6 +30,8 @@ class Config:
 
 
 class YouTube:
+    TRANSCRIPT_DIR = "transcripts/"
+
     def __init__(self):
         load_dotenv()
         self.config = Config()
@@ -166,9 +170,8 @@ class YouTube:
             return None
 
     def generate_quiz(self) -> List[Dict]:
-        """Generate quiz questions from transcript."""
         try:
-            quiz = self._generate_quiz_questions(self.transcript)
+            quiz = self._generate_quiz_questions()
             if quiz:
                 quiz_path = os.path.join(self.TRANSCRIPT_DIR, "Quiz.txt")
                 with open(quiz_path, 'w', encoding='utf-8') as f:
@@ -176,13 +179,13 @@ class YouTube:
             
             return quiz
         except Exception as e:
-            print.error(f"Error generating quiz: {str(e)}")
+            print(f"Error generating quiz: {str(e)}")
             return []
 
     def _generate_quiz_questions(self) -> List[Dict]:
         """Internal method to generate quiz questions."""
         prompt = f"""
-        Create 5 multiple-choice questions based on this transcript.
+        Create 5 multiple-choice questions based on this transcript.{self.transcript}
         Return them in this exact format:
         [
             {{"question": "Question text here?",
@@ -193,4 +196,11 @@ class YouTube:
         """
         
         response = self.llm.invoke(prompt + self.transcript)
-        return eval(response)
+        try:
+            # Parse the response as JSON to avoid syntax errors with eval()
+            quiz = json.loads(response)
+        except json.JSONDecodeError as e:
+            logging.error(f"JSON decode error: {str(e)}")
+            quiz = []
+
+        return quiz
