@@ -1,26 +1,94 @@
-// pages/api/chatRooms.ts
+import { NextRequest, NextResponse } from 'next/server';
 import pb from '@/lib/db/pocket_base.config';
-import type { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
-
+export async function POST(req: NextRequest) {
   try {
-    // Ensure the user is logged in
-    const user = pb.authStore.model;
-    if (!user) {
-      return res.status(401).json({ message: 'Unauthorized' });
+    // Parse the request body
+    const { platform, id: video_id } = await req.json();
+    if (!platform || !video_id) {
+      return NextResponse.json(
+        { error: 'Missing required fields: platform or id' },
+        { status: 400 }
+      );
     }
 
-    // Fetch chat rooms where the user matches
-    const chatRooms = await pb.collection('chat_rooms').getFullList({
-      filter: `user = "${user.id}"`, // Adjust this field if needed
-    });
+    const user = '9xslibrqch01ukr';
 
-    res.status(200).json(chatRooms);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error', error });
+    // Check if the chat room already exists
+    let existingChatRoom;
+    try {
+      existingChatRoom = await pb.collection('chat_rooms').getFirstListItem(
+        `platform="${platform}" && video_id="${video_id}"`,
+        { expand: '' }
+      );
+    } catch (error: any) {
+      if (error.status !== 404) {
+        // If the error is not a 404, rethrow it
+        throw error;
+      }
+      // If 404, no existing chat room was found (this is expected)
+      existingChatRoom = null;
+    }
+
+    let chatRoom;
+    if (existingChatRoom) {
+      // Fetch all chats associated with the existing chat room
+      const chats = await pb.collection('chats').getFullList({
+        filter: `chat_room="${existingChatRoom.id}"`,
+        sort: 'created', // Optional: Sort by creation time
+      });
+
+      chatRoom = existingChatRoom;
+
+      const response = NextResponse.json(
+        {
+          chatRoom,
+          chats,
+        },
+        { status: 200 }
+      );
+
+      // Set the `active_chat` cookie
+      response.headers.set(
+        'Set-Cookie',
+        `active_chat=${chatRoom.id}; Path=/; HttpOnly; SameSite=Strict;`
+      );
+
+      return response;
+    }
+
+    // Create a new chat room since no existing one was found
+    const newChatRoomData = {
+      user,
+      platform,
+      video_id,
+      isPinned: false,
+    };
+
+    chatRoom = await pb.collection('chat_rooms').create(newChatRoomData);
+
+    const response = NextResponse.json(
+      {
+        chatRoom,
+        chats: [], // New chat room, so no chats yet
+      },
+      { status: 201 }
+    );
+
+    // Set the `active_chat` cookie
+    response.headers.set(
+      'Set-Cookie',
+      `active_chat=${chatRoom.id}; Path=/; HttpOnly; SameSite=Strict;`
+    );
+
+    return response;
+  } catch (error: any) {
+    console.error('Error fetching or creating chat room:', error);
+
+    return NextResponse.json(
+      { error: error.message || 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
+
