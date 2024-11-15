@@ -13,6 +13,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, GoogleGenerativeAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
 
 load_dotenv(override=True)
 
@@ -113,39 +114,47 @@ class YouTube:
         chunks = text_splitter.split_text(text)
         vectorstore = FAISS.from_texts(texts=chunks, embedding=self.embeddings)
         vectorstore.save_local(self.config.FAISS_INDEX_DIR)
-        print('Vectore Store Created..')
-        self.vectordb = vectorstore
+        print('Vector Store Created..')
+        self.vectordb = vectorstore  # Set vectorstore to self.vectordb
+        return vectorstore
 
-    def qna_on_yt_video(self, vectordb, question: str, k: int = 6) -> str:
+
+    def qna_on_yt_video(self, question: str, k: int = 6) -> str:
         print(f"Mark: {question}")
-        
+        global youtube
         # Check if the vectordb is initialized
         if not self.vectordb:
             return "Error: Vectorstore not initialized. Please call create_vectorstore() first."
+
+        # Retrieve relevant documents from the vectorstore using the question
+        results = self.vectordb.similarity_search(question, k=k)
         
+        # Combine retrieved documents into a context (or pass them directly if needed)
+        context = " ".join([result.page_content for result in results])
+
         prompt_template = PromptTemplate(
             template="""Answer the user's question in a clear, informative, and helpful way,
             as if you are an expert about the topic.
             User Question: {question}
-
+            This is the context based on what you are suppossed to asnwer with: {context}
             If the transcript doesn't contain relevant information to answer the question, respond with:
             "I'm sorry, but the information provided doesn't contain details about that topic. Let me know if you have any other questions I can assist with."
 
             Otherwise, provide a thorough explanation that addresses the user's question.
             Use simple language, provide examples, and break down complex topics into easy-to-understand steps.
             Feel free to include links to relevant resources if that would be helpful.""",
-              input_variables=["question", "context"],
+            input_variables=["question", "context"],
         )
-        llm_chain = RetrievalQA.from_chain_type(
+
+        # Create the LLM chain with the context
+        llm_chain = LLMChain(
             llm=self.llm,
-            chain_type="stuff",
-            retriever= vectordb.as_retriever(
-                search_type="similarity", search_kwargs={"k": k}
-            ),
-            chain_type_kwargs={"prompt": prompt_template},
+            prompt=prompt_template,
         )
+
         try:
-            response = llm_chain({"question": question} )
+            # Pass the question and the context to the LLMChain
+            response = llm_chain.run({"question": question, "context": context})
             return response
         except Exception as e:
             print(f"Error generating answer: {str(e)}")

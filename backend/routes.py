@@ -46,12 +46,27 @@ def init_chat():
 
 @app.route("/chat", methods=["GET"])
 def chat():
-    global vectorstore  # Ensure vectorstore is accessed globally
-    question = "What is Demon1 Doing the video??"
-    if question and vectorstore:
-        answer = youtube.qna_on_yt_video(vectorstore, question)
+    global youtube  # Ensure the youtube instance is accessed globally
+
+    # Get the question directly from query parameters
+    question = request.args.get("question")
+
+    # Error handling for missing question parameter
+    if not question:
+        return jsonify({"status": "error", "message": "No question provided."}), 400
+
+    # Check if the vectorstore is initialized
+    if not youtube.vectordb:
+        return jsonify({"status": "error", "message": "Vectorstore not initialized."}), 400
+
+    try:
+        # Call the qna_on_yt_video method and pass the quaestion and the youtube.vectordb
+        answer = youtube.qna_on_yt_video(question)
         return jsonify({"status": "success", "answer": answer})
-    return jsonify({"status": "error", "message": "No question provided or vectorstore not initialized."}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Error during Q&A: {str(e)}"}), 500
+
+    
 
 @app.route("/init-quiz", methods=["GET"])
 def init_quiz():
