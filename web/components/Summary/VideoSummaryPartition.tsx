@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSummaryContext } from "./SummaryProvider";
 import Markdown from "react-markdown";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function VideoSummaryPartition() {
   const { platform, videoId } = useSummaryContext();
@@ -45,6 +46,7 @@ export default function VideoSummaryPartition() {
           <ModeToggle />
         </div>
       </header>
+      <Link href={`/quiz?platform=${platform}&id=${videoId}`} className="absolute bottom-4 right-4 bg-primary rounded-lg p-4">Take a Quiz</Link>
       <ScrollArea>
         <div className="flex flex-col gap-4 p-4 prose lg:prose-lg text-foreground">
           <Markdown>{videoSummary}</Markdown>
