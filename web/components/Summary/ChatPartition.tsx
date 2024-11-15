@@ -7,11 +7,10 @@ import { Avatar } from "@/components/ui/avatar";
 import { AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function ChatPartition() {
-  const [messages, setMessages] = useState([
-    { role: 'ai', content: 'Hello! How can I assist you today?' }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
+  const [chatRoomId, setChatRoomId] = useState(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -21,21 +20,57 @@ export default function ChatPartition() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    // Fetch or create chat room on component mount
+    const initializeChatRoom = async () => {
+      try {
+        const response = await fetch('/api/v1/chatRooms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ platform: 'test', id: 'test' }), // Replace with dynamic data
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setChatRoomId(data.chatRoom.id);
+          setMessages(data.chats.map(chat => ({
+            role: chat.sender === '1jm3823t2z663uf' ? 'ai' : 'user',
+            content: chat.message,
+          })));
+        } else {
+          console.error('Failed to initialize chat room:', data.error);
+        }
+      } catch (error) {
+        console.error('Error initializing chat room:', error);
+      }
+    };
+
+    initializeChatRoom();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    // Add user message
-    setMessages(prev => [...prev, { role: 'user', content: input.trim() }]);
+    const userMessage = input.trim();
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
 
-    // Simulate AI response (you'll replace this with actual AI integration)
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        role: 'ai',
-        content: "This is a simulated AI response. You'll integrate actual AI responses here."
-      }]);
-    }, 1000);
+    try {
+      const response = await fetch('/api/v1/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessages(prev => [...prev, { role: 'ai', content: data.message }]);
+      } else {
+        console.error('Failed to send message:', data.error);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
@@ -97,3 +132,4 @@ export default function ChatPartition() {
     </div>
   );
 }
+

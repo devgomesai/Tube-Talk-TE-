@@ -1,7 +1,7 @@
 import pb from '@/lib/db/pocket_base.config';
 import { NextResponse } from 'next/server';
 
-const PYTHON_BACKEND_SUMMARY_URL = 'http://localhost:5000/transcript';
+const PYTHON_BACKEND_SUMMARY_URL = 'http://localhost:5000/summary';
 
 export async function GET(
   request: Request,
@@ -67,7 +67,7 @@ export async function GET(
     const transcriptData = await response.json();
     return NextResponse.json(
       {
-        summary: transcriptData.transcript,
+        summary: transcriptData.summary,
         error: null,
       },
       { status: 200 }
