@@ -1,8 +1,7 @@
-streamlit
 langchain
 faiss-cpu
 yt-dlp
 assemblyai
-openai
+langchain-google-genai
 python-dotenv
-audio-transcript
+flask

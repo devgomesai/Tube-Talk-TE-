@@ -1,0 +1,131 @@
+# Direction of the diagram
+direction: right
+
+# Models/Entities
+User: {
+  label: "User"
+  shape: class
+  id: string
+  username: string
+  email: string
+  name: string
+  avatar: string
+  verified: boolean
+  emailVisibility: boolean
+  created: datetime
+  updated: datetime
+
+  authenticate()
+  updateProfile()
+  getHistory()
+}
+
+VideoSummary: {
+  label: "VideoSummary"
+  shape: class
+  id: string
+  platform_name: string
+  video_id: string
+  video_summary: string
+  created: datetime
+  updated: datetime
+
+  generateSummary()
+  updateSummary()
+  getSummaryByVideoId()
+}
+
+Chat: {
+  label: "Chat"
+  shape: class
+  id: string
+  user_id: string
+  video_id: string
+  message: string
+  timestamp: datetime
+  type: enum(user|ai)
+
+  sendMessage()
+  getConversation()
+  getChatHistory()
+}
+
+# Services
+AuthenticationService: {
+  label: "AuthenticationService"
+  shape: class
+
+  login()
+  register()
+  verifyToken()
+  refreshToken()
+}
+
+SummaryService: {
+  label: "SummaryService"
+  shape: class
+
+  generateSummary()
+  storeSummary()
+  getSummary()
+}
+
+ChatService: {
+  label: "ChatService"
+  shape: class
+
+  processMessage()
+  generateResponse()
+  storeMessage()
+  fetchContext()
+}
+
+# Relationships
+User -> Chat: "1:many" {
+  style.stroke: blue
+  style.stroke-dash: 3
+}
+
+VideoSummary -> Chat: "1:many" {
+  style.stroke: blue
+  style.stroke-dash: 3
+}
+
+AuthenticationService -> User: "manages" {
+  style.stroke: green
+}
+
+SummaryService -> VideoSummary: "manages" {
+  style.stroke: green
+}
+
+ChatService -> Chat: "manages" {
+  style.stroke: green
+}
+
+# Service Dependencies
+ChatService -> SummaryService: "uses" {
+  style.stroke: purple
+  style.stroke-dash: 5
+}
+
+ChatService -> AuthenticationService: "authenticates" {
+  style.stroke: purple
+  style.stroke-dash: 5
+}
+
+SummaryService -> youtube_api: "fetches transcript" {
+  style.stroke: gray
+  style.stroke-dash: 5
+}
+
+SummaryService -> gemini_ai: "generates summary" {
+  style.stroke: gray
+  style.stroke-dash: 5
+}
+
+ChatService -> gemini_ai: "generates responses" {
+  style.stroke: gray
+  style.stroke-dash: 5
+}
+

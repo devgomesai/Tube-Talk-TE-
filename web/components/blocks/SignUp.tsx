@@ -1,59 +1,168 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { Label } from "../ui/label";
 import { Input } from "../aceternity/input";
 import { cn } from "@/lib/utils";
-import { IconBrandGoogle, IconBrandGithub } from "@tabler/icons-react";
-import Link from "next/link";
-import { Button } from "../ui/button";
 import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import pb from "@/lib/db/pocket_base.config";
+
+type FormData = {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export function SignupFormDemo() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form submitted");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setError,
+  } = useForm<FormData>();
+  console.log(1);
+  console.log(pb);
+  const [error, setErrorState] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  console.log(2);
+
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    console.log(3);
+    // Check if the passwords match before submitting
+    if (data.password !== data.confirmPassword) {
+      console.log(4);
+      setError("confirmPassword", {
+        type: "manual",
+        message: "Passwords do not match",
+      });
+      return;
+    }
+    console.log(5);
+
+    // Validate email format using a regex
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    console.log(6);
+    if (!emailRegex.test(data.email)) {
+      setError("email", {
+        type: "manual",
+        message: "Invalid email address",
+      });
+      return;
+    }
+
+    console.log(2);
+    // Prepare the data for user creation
+    const userData = {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      passwordConfirm: data.confirmPassword,
+    };
+
+    try {
+      console.log(1);
+      setErrorState(null); // Clear previous errors
+      console.log(2);
+
+      // Create user in PocketBase
+      const record = await pb.collection("users").create(userData);
+      console.log(3);
+
+      setSuccess("Signup successful! Redirecting...");
+      console.log(4);
+      setTimeout(() => {
+        window.location.href = "/user"; // Redirect to login page after success
+        console.log(5);
+      }, 2000);
+    } catch (err: any) {
+      setErrorState(err.message || "Signup failed. Please try again.");
+    }
   };
+
+  // Watch password to check if confirm password matches
+  const password = watch("password");
+
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
       <div className="flex items-center mb-4" onClick={() => window.history.back()}>
         <ChevronLeft className="h-6 w-6 text-neutral-800 dark:text-neutral-300" />
-        <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-          Back
-        </span>
+        <span className="text-neutral-700 dark:text-neutral-300 text-sm">Back</span>
       </div>
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
         Sign Up to <span className="text-primary">TubeTalk</span>
       </h2>
-      <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300">
-      </p>
 
-      <form className="my-8" onSubmit={handleSubmit}>
-        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
-          <LabelInputContainer>
-            <Label htmlFor="firstname">First name</Label>
-            <Input id="firstname" placeholder="Tyler" type="text" />
-          </LabelInputContainer>
-          <LabelInputContainer>
-            <Label htmlFor="lastname">Last name</Label>
-            <Input id="lastname" placeholder="Durden" type="text" />
-          </LabelInputContainer>
-        </div>
+      <form className="my-8" onSubmit={handleSubmit(onSubmit)}>
+        {/* Username */}
+        <LabelInputContainer className="mb-4">
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            placeholder="Enter your username"
+            type="text"
+            {...register("username", { required: "Username is required" })}
+          />
+          {errors.username && <ErrorText message={errors.username.message} />}
+        </LabelInputContainer>
+
+        {/* Email */}
         <LabelInputContainer className="mb-4">
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
+          <Input
+            id="email"
+            placeholder="Enter your email"
+            type="email"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                message: "Enter a valid email address",
+              },
+            })}
+          />
+          {errors.email && <ErrorText message={errors.email.message} />}
         </LabelInputContainer>
+
+        {/* Password */}
         <LabelInputContainer className="mb-4">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-8">
-          <Label htmlFor="confirmpassword">Confirm your password</Label>
           <Input
-            id="confirmpassword"
+            id="password"
             placeholder="••••••••"
-            type="confirmpassword"
+            type="password"
+            {...register("password", {
+              required: "Password is required",
+              minLength: { value: 6, message: "Password must be at least 6 characters long" },
+            })}
           />
+          {errors.password && <ErrorText message={errors.password.message} />}
         </LabelInputContainer>
+
+        {/* Confirm Password */}
+        <LabelInputContainer className="mb-4">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            placeholder="••••••••"
+            type="password"
+            {...register("confirmPassword", {
+              required: "Please confirm your password",
+              validate: (value) =>
+                value === password || "Passwords do not match",
+            })}
+          />
+          {errors.confirmPassword && (
+            <ErrorText message={errors.confirmPassword.message} />
+          )}
+        </LabelInputContainer>
+
+        {/* Display Errors */}
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
 
         <button
           className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
@@ -65,35 +174,18 @@ export function SignupFormDemo() {
 
         <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
 
-        <div className="flex flex-col space-y-4">
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              Login with GitHub
-            </span>
-            <BottomGradient />
-          </button>
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-
-            <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              Login with Google
-            </span>
-            <BottomGradient />
-          </button>
-        </div>
+        <p className="text-sm text-center">
+          Already have an account?{" "}
+          <Link href="/auth/login" className="text-primary">
+            Login
+          </Link>
+        </p>
       </form>
-      Already have an account? <Link href="/auth/login" className="text-primary">Login</Link>
     </div>
   );
 }
 
+// Helper Components
 const BottomGradient = () => {
   return (
     <>
@@ -116,3 +208,8 @@ const LabelInputContainer = ({
     </div>
   );
 };
+
+const ErrorText = ({ message }: { message?: string }) => (
+  <span className="text-red-500 text-sm">{message}</span>
+);
+

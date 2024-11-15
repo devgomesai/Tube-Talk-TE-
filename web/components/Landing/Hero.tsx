@@ -1,10 +1,31 @@
 "use client";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, MousePointerClick, Video } from "lucide-react";
 import { Input } from "../aceternity/input";
 import { Button } from "../ui/button";
 
 export default function Hero() {
+  const [youtubeUrl, setYoutubeUrl] = useState(""); // Store the URL here
+
+  const handleSubmit = (event:React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); 
+
+    fetch("http://127.0.0.1:5000/transcript", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: youtubeUrl }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Server Response:", data);
+        // Handle the response here if needed
+      })
+      .catch((error) => console.error("Error:", error));
+  };
+
   return (
     <div className="relative pt-16 md:pt-24 lg:pt-32 pb-20 px-4 sm:px-6 lg:px-8 z-30">
       <div className="max-w-7xl mx-auto space-y-12">
@@ -42,13 +63,18 @@ export default function Hero() {
           >
             <div className="flex flex-row gap-2 sm:gap-4">
               <Input
+                id="youtube-url"
                 type="url"
                 placeholder="Paste YouTube URL here"
+                value={youtubeUrl}
+                onChange={(e) => setYoutubeUrl(e.target.value)} // Update the state when input changes
                 className="flex-grow text-base sm:text-lg py-6 px-6 sm:py-8 sm:px-8 shadow-md hover:shadow-lg transition-shadow rounded-lg"
               />
               <Button
                 type="submit"
+                id="submit-btn"
                 className="cursor-pointer h-auto text-lg font-medium shadow-md hover:shadow-lg transition-shadow px-6 sm:px-8"
+                onClick={handleSubmit} // Handle the form submission
               >
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -77,5 +103,5 @@ export default function Hero() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
