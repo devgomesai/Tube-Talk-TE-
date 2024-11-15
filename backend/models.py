@@ -109,9 +109,16 @@ class YouTube:
         chunks = text_splitter.split_text(text)
         vectorstore = FAISS.from_texts(texts=chunks, embedding=self.embeddings)
         vectorstore.save_local(self.config.FAISS_INDEX_DIR)
+        print('Vectore Store Created..')
         self.vectordb = vectorstore
 
-    def qna_on_yt_video(self, question: str, k: int = 6) -> str:
+    def qna_on_yt_video(self, vectordb, question: str, k: int = 6) -> str:
+        print(f"Mark: {question}")
+        
+        # Check if the vectordb is initialized
+        if not self.vectordb:
+            return "Error: Vectorstore not initialized. Please call create_vectorstore() first."
+        
         prompt_template = PromptTemplate(
             template="""Answer the user's question in a clear, informative, and helpful way,
             as if you are an expert about the topic.
@@ -123,24 +130,23 @@ class YouTube:
             Otherwise, provide a thorough explanation that addresses the user's question.
             Use simple language, provide examples, and break down complex topics into easy-to-understand steps.
             Feel free to include links to relevant resources if that would be helpful.""",
-            input_variables=["question"],
+              input_variables=["question", "context"],
         )
-
         llm_chain = RetrievalQA.from_chain_type(
             llm=self.llm,
             chain_type="stuff",
-            retriever=self.vectordb.as_retriever(
+            retriever= vectordb.as_retriever(
                 search_type="similarity", search_kwargs={"k": k}
             ),
             chain_type_kwargs={"prompt": prompt_template},
         )
-
         try:
-            response = llm_chain(question)
+            response = llm_chain({"question": question} )
             return response
         except Exception as e:
             print(f"Error generating answer: {str(e)}")
             return "Error generating the answer."
+
 
     def get_summary(self):
         if not self.transcript or not self.title:
@@ -158,6 +164,7 @@ class YouTube:
             Keep the summary under 100 words, ensuring it remains both informative and concise.
             Avoid including unnecessary details while making sure no critical points are left out"
         """
+        print(prompt)
         try:
             response = self.llm.invoke(prompt)
             return response
