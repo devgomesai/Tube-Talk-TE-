@@ -4,26 +4,30 @@ import { motion } from "framer-motion";
 import { ArrowRight, MousePointerClick, Video } from "lucide-react";
 import { Input } from "../aceternity/input";
 import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { url } from "inspector";
 
 export default function Hero() {
   const [youtubeUrl, setYoutubeUrl] = useState(""); // Store the URL here
+  let platform: string, videoId: string;
+  const router = useRouter();
 
-  const handleSubmit = (event:React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); 
+  const handleSubmit = async (url: string) => {
+    const encodedUrl = encodeURIComponent(url);
+    console.log("Encoded URL:", encodedUrl);
 
-    fetch("http://127.0.0.1:5000/transcript", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url: youtubeUrl }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Server Response:", data);
-        // Handle the response here if needed
-      })
-      .catch((error) => console.error("Error:", error));
+    try {
+      const response = await fetch(`/api/v1/link?url=${encodedUrl}`);
+      const data = await response.json();
+
+      if (data.platform && data.videoId) {
+        router.push(`/user?platform=${data.platform}&id=${data.videoId}`);
+      } else {
+        console.log("Please provide a valid YouTube URL.");
+      }
+    } catch (error) {
+      console.log("Error processing URL:", error);
+    }
   };
 
   return (
@@ -74,7 +78,7 @@ export default function Hero() {
                 type="submit"
                 id="submit-btn"
                 className="cursor-pointer h-auto text-lg font-medium shadow-md hover:shadow-lg transition-shadow px-6 sm:px-8"
-                onClick={handleSubmit} // Handle the form submission
+                onClick={() => handleSubmit(youtubeUrl)} // Handle the form submission
               >
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -87,15 +91,27 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-wrap justify-center gap-4 px-4"
           >
-            <Button variant="outline" className="gap-2 p-2 hover:bg-primary/5 border-border/40">
+            <Button
+              variant="outline"
+              className="gap-2 p-2 hover:bg-primary/5 border-border/40"
+              onClick={() => handleSubmit("https://www.youtube.com/watch?v=psLHV0r1MGI")}
+            >
               <Video className="h-5 w-5" />
               <span>Tubetalk</span>
             </Button>
-            <Button variant="outline" className="gap-2 p-2 hover:bg-primary/5 border-border/40">
+            <Button
+              variant="outline"
+              className="gap-2 p-2 hover:bg-primary/5 border-border/40"
+              onClick={() => handleSubmit("https://www.youtube.com/watch?v=psLHV0r1MGI")}
+            >
               <Video className="h-5 w-5" />
               <span>Rick Roll</span>
             </Button>
-            <Button variant="outline" className="gap-2 p-2 hover:bg-primary/5 border-border/40">
+            <Button
+              variant="outline"
+              className="gap-2 p-2 hover:bg-primary/5 border-border/40"
+              onClick={() => handleSubmit("https://www.youtube.com/watch?v=psLHV0r1MGI")}
+            >
               <Video className="h-5 w-5" />
               <span>Me at Zoo</span>
             </Button>

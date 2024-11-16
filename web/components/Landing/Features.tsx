@@ -57,7 +57,7 @@ const features = [
 export default function Features() {
   return (
     <>
-      <h1 className="text-4xl font-bold text-center mt-32">Whats In TubeTalk? <span className="text-xl font-normal text-muted-foreground"> Everything You Need from a video at your fingertips</span></h1>
+      <h1 id="features" className="text-4xl font-bold text-center mt-32">Whats In TubeTalk? <span className="text-xl font-normal text-muted-foreground"> Everything You Need from a video at your fingertips</span></h1>
       <BentoGrid className="p-16">
         {features.map((feature, idx) => (
           <BentoCard key={idx} {...feature} />

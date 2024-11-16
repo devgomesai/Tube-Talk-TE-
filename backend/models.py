@@ -46,7 +46,8 @@ class YouTube:
         self.embeddings = GoogleGenerativeAIEmbeddings(
             model="models/embedding-001", dimensions=1536
         )
-        self.llm = GoogleGenerativeAI(model="gemini-pro", temperature=0.1)
+        self.llm = GoogleGenerativeAI(model="gemini-1.0-pro", temperature=0.1)
+        self.llm_qna = GoogleGenerativeAI(model="gemini-1.5-flash-002", temperature=0.1)
 
     def _setup_assemblyai(self):
         aai.settings.api_key = os.getenv("ASSEMBLYAI_API_KEY")
@@ -119,7 +120,7 @@ class YouTube:
         return vectorstore
 
 
-    def qna_on_yt_video(self, question: str, k: int = 6) -> str:
+    def qna_on_yt_video(self, question: str, k: int = 7) -> str:
         print(f"Mark: {question}")
         global youtube
         # Check if the vectordb is initialized
@@ -128,27 +129,25 @@ class YouTube:
 
         # Retrieve relevant documents from the vectorstore using the question
         results = self.vectordb.similarity_search(question, k=k)
-        
+        '''print(f"Top {k} results:")
+        for result in results:
+            print(result.page_content)'''
+
         # Combine retrieved documents into a context (or pass them directly if needed)
         context = " ".join([result.page_content for result in results])
 
         prompt_template = PromptTemplate(
-            template="""Answer the user's question in a clear, informative, and helpful way,
-            as if you are an expert about the topic.
-            User Question: {question}
-            This is the context based on what you are suppossed to asnwer with: {context}
-            If the transcript doesn't contain relevant information to answer the question, respond with:
-            "I'm sorry, but the information provided doesn't contain details about that topic. Let me know if you have any other questions I can assist with."
-
-            Otherwise, provide a thorough explanation that addresses the user's question.
-            Use simple language, provide examples, and break down complex topics into easy-to-understand steps.
-            Feel free to include links to relevant resources if that would be helpful.""",
+            template="""Answer the user's question based on the provided context. 
+            If no relevant information is found in the context, please clearly state that 
+            you cannot answer the question based on the provided context. 
+            The context you should use is: {context}
+            User's Question: {question}""",
             input_variables=["question", "context"],
         )
 
         # Create the LLM chain with the context
         llm_chain = LLMChain(
-            llm=self.llm,
+            llm=self.llm_qna,
             prompt=prompt_template,
         )
 

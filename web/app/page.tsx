@@ -4,6 +4,7 @@ import ExplanationVideo from "@/components/Landing/ExplanationVideo";
 import Features from "@/components/Landing/Features";
 import Testimonials from "@/components/Landing/Testimonials";
 import Footer from "@/components/Landing/Footer";
+import ContactUs from "@/components/Landing/ContactUs";
 
 export default async function LandingPage() {
   return (
@@ -20,8 +21,13 @@ export default async function LandingPage() {
       <Features />
       {/* Testimonials Section */}
       <Testimonials />
+
+
+      {/* Contact Us Section */}
+      <ContactUs />
       {/* Footer Section */}
       <Footer />
+
 
     </div>
   );
