@@ -28,12 +28,9 @@ export async function POST(req: NextRequest) {
     const userMessage = await pb.collection('chats').create(userMessageData);
     console.log('Stored user message:', userMessage);
 
+    let question = encodeURIComponent(message)
     // Call the backend API at localhost:5000/chat with the user message
-    const response = await fetch('http://localhost:5000/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
-    });
+    const response = await fetch(`http://localhost:5000/chat?question=${question}`);
 
     if (!response.ok) {
       throw new Error(`Backend error: ${response.statusText}`);
