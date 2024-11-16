@@ -82,7 +82,7 @@ export default function Testimonials() {
   return (
     <>
       <h1 className="text-center font-bold text-4xl mt-32">What People Are Saying</h1>
-      <div className="relative flex p-16 w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl mb-64">
+      <div className="relative flex p-16 w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl mb-16">
         <Marquee pauseOnHover className="[--duration:20s]">
           {firstRow.map((review) => (
             <TestimonialComponent key={review.username} {...review} />
