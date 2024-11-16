@@ -30,7 +30,7 @@ export async function GET(
     if (existingSummary) {
       return NextResponse.json(
         {
-          summary: existingSummary,
+          summary: existingSummary.video__summary,
           error: null,
         },
         { status: 200 }
@@ -68,7 +68,7 @@ export async function GET(
     // Now generate the summary
     const response2 = await fetch(PYTHON_BACKEND_SUMMARY_URL);
     const summaryData = await response2.json();
-
+    console.log(summaryData)
     if (!summaryData.summary) {
       throw new Error('Python backend returned an empty summary.');
     }

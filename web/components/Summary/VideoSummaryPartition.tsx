@@ -20,8 +20,9 @@ export default function VideoSummaryPartition() {
       try {
         const response = await fetch(`/api/v1/${platform}/${videoId}`);
         const data = await response.json();
+        console.log(data)
         if (data.summary) {
-          setVideoSummary(data.summary.video_summary);
+          setVideoSummary(data.summary);
         }
       } catch (error) {
         console.error("Error fetching video summary:", error);
