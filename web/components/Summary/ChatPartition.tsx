@@ -5,12 +5,14 @@ import { Send } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useSummaryContext } from './SummaryProvider';
 
 export default function ChatPartition() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
   const [chatRoomId, setChatRoomId] = useState(null);
+  const { platform, videoId } = useSummaryContext();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -27,7 +29,7 @@ export default function ChatPartition() {
         const response = await fetch('/api/v1/chatRooms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ platform: 'test', id: 'test' }), // Replace with dynamic data
+          body: JSON.stringify({ platform, id: videoId }), // Replace with dynamic data
         });
         const data = await response.json();
         if (response.ok) {

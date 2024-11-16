@@ -73,7 +73,7 @@ def init_quiz():
     if youtube.transcript:
         quiz = youtube.generate_quiz() 
         if quiz:
-            return jsonify({"status": "success", "quiz": quiz})  
+            return jsonify({"status": "success", "message": quiz})  
         return jsonify({"status": "error", "message": "Failed to generate quiz."}), 400
     return jsonify({"status": "error", "message": "Transcript not available."}), 400
 

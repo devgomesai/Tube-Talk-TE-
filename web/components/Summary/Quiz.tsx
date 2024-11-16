@@ -44,7 +44,7 @@ export default function QuizDialog({ open, onOpenChange, platform, videoId }: Qu
         const data = await response.json();
 
         if (data.status === 'success' && data.quiz) {
-          setQuiz(data.quiz);
+          setQuiz(data);
         } else {
           setError(data.message || 'Failed to load quiz');
         }

@@ -1,88 +1,112 @@
-import pb from "@/lib/db/pocket_base.config";
 import { NextRequest, NextResponse } from "next/server";
+import pb from "@/lib/db/pocket_base.config";
 
-type Params = Promise<{
-  platform: string;
+// Define types for better type safety
+interface Quiz {
+  questions: {
+    question: string;
+    options: string[];
+    correct_answer: string;
+  }[];
+}
+
+interface QuizRecord {
   id: string;
-}>
+  platform: string;
+  video_id: string;
+  quiz: Quiz;
+  created: string;
+  updated: string;
+}
+
+interface PythonQuizResponse {
+  status: string;
+  message?: string | Quiz;
+}
 
 export async function GET(request: NextRequest) {
-
-  const searchParams = request.nextUrl.searchParams;
-  const platform = searchParams.get('platform')?.trim()?.toLowerCase();
-  const video_id = searchParams.get('id')?.trim();
   try {
-    if (!platform || !video_id) {
+    // 1. Extract and validate query parameters
+    const searchParams = request.nextUrl.searchParams;
+    const platform = searchParams.get('platform')?.trim()?.toLowerCase();
+    const videoId = searchParams.get('id')?.trim();
+
+    if (!platform || !videoId) {
       return NextResponse.json(
-        { status: "error", message: "Missing platform or video ID" },
+        { 
+          status: false, 
+          error: "Missing required parameters: platform and id must be provided" 
+        },
         { status: 400 }
       );
     }
 
-    // Search for the quiz in PocketBase
-    let record;
+    // 2. Try to fetch existing quiz from PocketBase
     try {
-      record = await pb.collection("quizzes").getFirstListItem(`platform="${platform}" && video_id="${video_id}"`);
+      const record = await pb
+        .collection("quizzes")
+        .getFirstListItem<QuizRecord>(`platform="${platform}" && video_id="${videoId}"`);
+
+      if (record?.quiz) {
+        return NextResponse.json({
+          status: true,
+          questions: record.quiz
+        });
+      }
     } catch (error: any) {
-      // If no quiz is found, we proceed to generate one
-      if (!error.response || error.response.code !== 404) {
-        console.error("Error querying PocketBase:", error);
-        return NextResponse.json(
-          { status: "error", message: "Error querying PocketBase" },
-          { status: 500 }
-        );
+      // Only proceed if the error is "record not found"
+      if (error.status !== 404) {
+        throw error;
       }
     }
-    if (record) {
-      // If the quiz exists, return it
-      return NextResponse.json({ status: "success", quiz: record.quiz });
-    }
 
-    // If no quiz is found, query the Python backend
+    // 3. If no existing quiz, generate new one from Python backend
     const pythonResponse = await fetch("http://localhost:5000/init-quiz", {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
-
     if (!pythonResponse.ok) {
-      const errorMessage = await pythonResponse.json();
-      return NextResponse.json(
-        { status: "error", message: errorMessage.message || "Failed to generate quiz" },
-        { status: 500 }
-      );
+      throw new Error(`Python backend error: ${pythonResponse.statusText}`);
     }
 
-    const pythonData = await pythonResponse.json();
+    const pythonData: PythonQuizResponse = await pythonResponse.json();
+    console.log(pythonData)
 
-    if (pythonData.status !== "success" || !pythonData.quiz) {
-      return NextResponse.json(
-        { status: "error", message: "Failed to generate quiz" },
-        { status: 500 }
-      );
+    if (!pythonData.message || pythonData.status !== "success") {
+      throw new Error(pythonData.message || "Failed to generate quiz from Python backend");
     }
 
-    // Store the generated quiz in PocketBase
+    // 4. Store new quiz in PocketBase
     try {
       const savedQuiz = await pb.collection("quizzes").create({
         platform,
-        video_id,
-        quiz: pythonData.quiz,
+        video_id: videoId,
+        questions: pythonData.message,
       });
 
-      return NextResponse.json({ status: "success", quiz: savedQuiz.quiz });
-    } catch (error) {
-      console.error("Error storing quiz in PocketBase:", error);
-      return NextResponse.json(
-        { status: "error", message: "Failed to store generated quiz" },
-        { status: 500 }
-      );
+      return NextResponse.json({
+        status: true,
+        questions: savedQuiz.quiz
+      });
+    } catch (error: any) {
+      console.error("Failed to store quiz in PocketBase:", error);
+      throw new Error("Failed to store generated quiz");
     }
-  } catch (error) {
-    console.error("Error handling quiz request:", error);
+
+  } catch (error: any) {
+    console.error("Quiz generation error:", error);
+    
     return NextResponse.json(
-      { status: "error", message: "Internal server error" },
-      { status: 500 }
+      {
+        status: false,
+        error: error.message || "Internal server error"
+      },
+      { 
+        status: error.status || 500 
+      }
     );
   }
 }
