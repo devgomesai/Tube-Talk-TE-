@@ -2,6 +2,7 @@ import pb from '@/lib/db/pocket_base.config';
 import { NextResponse } from 'next/server';
 
 const PYTHON_BACKEND_SUMMARY_URL = 'http://localhost:5000/summary';
+const PYTHON_BACKEND_TRANSCRIPT_URL = 'http://localhost:5000/transcript';
 
 export async function GET(
   request: Request,
@@ -52,7 +53,7 @@ export async function GET(
   // If no summary in PocketBase, request transcript from Python backend
   try {
     const video_url = `https://www.youtube.com/watch?v=${video_id}`;
-    const response = await fetch(PYTHON_BACKEND_SUMMARY_URL, {
+    const response = await fetch(PYTHON_BACKEND_TRANSCRIPT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -63,11 +64,18 @@ export async function GET(
     if (!response.ok) {
       throw new Error(`Python backend returned an error: ${response.statusText}`);
     }
+    // Generated Transcrit
+    // Now generate the summary
+    const response2 = await fetch(PYTHON_BACKEND_SUMMARY_URL);
+    const summaryData = await response2.json();
 
-    const transcriptData = await response.json();
+    if (!summaryData.summary) {
+      throw new Error('Python backend returned an empty summary.');
+    }
+
     return NextResponse.json(
       {
-        summary: transcriptData.summary,
+        summary: summaryData.summary,
         error: null,
       },
       { status: 200 }
