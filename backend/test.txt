@@ -1,0 +1,48 @@
+
+## Process video
+curl -X POST "http://localhost:8000/process_video/" \
+-H "Content-Type: application/json" \
+-d '{"video_url": "https://youtube.com/watch?v=E7AXalS3uX4"}'
+
+## ----------------------------------------------------------------
+
+## Chat with video
+curl -X POST "http://localhost:8000/chat_with_video/" \
+  -H "Content-Type: application/json" \
+  -d '{"video_id": "E7AXalS3uX4", "query" : "What is the main topic?"}'
+
+export interface ChatResponse {
+  answer: string
+}
+
+## ----------------------------------------------------------------
+
+## generate_quiz
+curl -X POST "http://localhost:8000/generate_quiz/" \
+     -H "Content-Type: application/json" \
+     -d '{"video_id": "E7AXalS3uX4"}'
+
+export interface QuizResponse {
+  quiz: Quiz
+}
+
+export interface Quiz {
+  quiz: Quiz2[]
+}
+
+export interface Quiz2 {
+  question: string
+  options: string[]
+  answer: string
+}
+
+## ----------------------------------------------------------------
+
+## summarize_video
+curl -X POST "http://localhost:8000/summarize_video/" \
+     -H "Content-Type: application/json" \
+     -d '{"video_id": "E7AXalS3uX4"}'
+
+export interface SummaryResponse {
+  summary: string
+}
