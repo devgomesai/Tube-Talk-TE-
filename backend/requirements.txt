@@ -9,3 +9,6 @@ faiss-cpu
 google-auth
 pandas
 python-dotenv
+pytest
+fastapi
+httpx
