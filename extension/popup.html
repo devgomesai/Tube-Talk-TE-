@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { 
+      width: 400px;
+      padding: 15px;
+      font-family: Arial, sans-serif;
+    }
+    .product-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .product-image {
+      width: 60px;
+      height: 60px;
+      margin-right: 15px;
+      object-fit: contain;
+    }
+    .product-info {
+      flex: 1;
+    }
+    #resultsContainer {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+    .loading {
+      color: #666;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="productName"></div>
+  <div id="resultsContainer">
+    <div class="loading">Loading recommendations...</div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
