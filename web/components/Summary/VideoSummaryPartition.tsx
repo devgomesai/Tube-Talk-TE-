@@ -9,30 +9,48 @@ import Markdown from "react-markdown";
 import { useEffect, useState } from "react";
 import QuizDialog from "./Quiz";
 
-
 export default function VideoSummaryPartition() {
   const { platform, videoId } = useSummaryContext();
   const [videoSummary, setVideoSummary] = useState(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchVideoSummary = async () => {
+      if (!videoId) return;
+      
+      setIsLoading(true);
       try {
-        const response = await fetch(`/api/v1/${platform}/${videoId}`);
+        // Use the correct FastAPI endpoint with form data
+        const formData = new FormData();
+        formData.append('video_id', videoId);
+        
+        const response = await fetch('http://localhost:8000/summarize_video/', {
+          method: 'POST',
+          body: formData
+        });
+        
         const data = await response.json();
-        console.log(data)
+        console.log("Summary response:", data);
+        
         if (data.summary) {
           setVideoSummary(data.summary);
+        } else if (data.detail) {
+          console.error("API error:", data.detail);
+          setVideoSummary(`Error: ${data.detail}`);
         }
       } catch (error) {
         console.error("Error fetching video summary:", error);
+        setVideoSummary("Failed to fetch summary. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (platform && videoId) {
+    if (videoId) {
       fetchVideoSummary();
     }
-  }, [platform, videoId]);
+  }, [videoId]);
 
   return (
     <>
@@ -50,6 +68,7 @@ export default function VideoSummaryPartition() {
         onClick={() => setQuizOpen(true)}
         className="absolute bottom-4 right-4"
         size="lg"
+        disabled={isLoading || !videoSummary}
       >
         Take a Quiz
       </Button>
@@ -61,7 +80,11 @@ export default function VideoSummaryPartition() {
       />
       <ScrollArea>
         <div className="flex flex-col gap-4 p-4 prose lg:prose-lg text-foreground">
-          <Markdown>{videoSummary}</Markdown>
+          {isLoading ? (
+            <div className="text-center py-8">Loading summary...</div>
+          ) : (
+            <Markdown>{videoSummary || "No summary available."}</Markdown>
+          )}
         </div>
       </ScrollArea>
     </>
