@@ -21,3 +21,5 @@ backend/transcripts
 backend/audio
 backend/logs
 backend/test/__pycache__
+extension/node_modules
+extension/build
