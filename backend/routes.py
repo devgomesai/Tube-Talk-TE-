@@ -37,7 +37,7 @@ app.add_middleware(
 video_data_store: Dict[str, Dict[str, Any]] = {}
 
 # API Keys - read from environment variables
-gemini_api_key = os.getenv("GOOGLE_API_KEY")
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 assemblyai_api_key = os.getenv("ASSEMBLYAI_API_KEY")
 
 if assemblyai_api_key:
@@ -191,13 +191,16 @@ def create_vectorstore(text, video_id):
         metadatas=metadatas
     )
     video_data_store[video_id]['vectorstore'] = vectorstore
+    print(f"Vector store CREATED for video_id: {video_id}")
     return "VectorDB created successfully"
 
 # Tool: Chat with Video (reused and adapted, no status updates)
 def chat_with_video(query, video_id):
+    print(f"Chat request received for video_id: {video_id}")
     if llm is None:
         raise HTTPException(status_code=500, detail="LLM service not initialized.")
     if video_id not in video_data_store or 'vectorstore' not in video_data_store[video_id] or video_data_store[video_id]['vectorstore'] is None:
+        print(f"No vector store FOUND for video_id: {video_id}") 
         raise HTTPException(status_code=400, detail="No vector database available for this video. Process video first.")
 
     vectorstore = video_data_store[video_id]['vectorstore']
@@ -212,6 +215,8 @@ def chat_with_video(query, video_id):
             context_parts.append(f"Context {i+1}: {context}")
 
         context = "\n\n".join(context_parts)
+
+        print(query)
 
         prompt = f"""
 You are an AI assistant specialized in answering questions about YouTube videos based on their transcripts. You can also respond in the user's preferred language.
@@ -393,9 +398,12 @@ async def chat_with_video_route(request: Request):
         answer = chat_with_video(query, video_id)
         return JSONResponse(content={"answer": answer})
     except HTTPException as e:
+        # Explicitly return detail from HTTPException in JSON response for 4xx errors
         return JSONResponse(content={"detail": e.detail}, status_code=e.status_code)
     except Exception as e:
-        return JSONResponse(content={"detail": str(e)}, status_code=500)
+        # For 500 errors, still return a generic error but include exception string for server-side logs
+        print(f"Server error in chat_with_video_route: {e}") # Log server-side error
+        return JSONResponse(content={"detail": "Internal server error"}, status_code=500)
 
 @app.post("/summarize_video/")
 async def summarize_video_route(request: Request):
