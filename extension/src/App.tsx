@@ -6,6 +6,12 @@ import { Loader2, Youtube, ExternalLink, AlertCircle } from "lucide-react"
 
 interface SummaryResponse {
   summary: string
+  detail?: string
+}
+
+interface ProcessResponse {
+  detail?: string
+  [key: string]: any  // To accommodate other response fields
 }
 
 interface ChromeTab {
@@ -20,9 +26,11 @@ declare global {
 
 function App() {
   const [videoId, setVideoId] = useState<string | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [summary, setSummary] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [processingStep, setProcessingStep] = useState<string>("initializing")
 
   useEffect(() => {
     if (typeof window.chrome !== "undefined" && window.chrome.tabs) {
@@ -32,8 +40,10 @@ function App() {
           const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/)
           if (match) {
             setVideoId(match[1])
+            setVideoUrl(url)
           } else {
             setVideoId(null)
+            setVideoUrl(null)
             setIsLoading(false)
             setError("Not a YouTube video page")
           }
@@ -42,13 +52,42 @@ function App() {
     }
   }, [])
 
+  const processVideo = async () => {
+    if (!videoUrl) {
+      setIsLoading(false)
+      return
+    }
+
+    setProcessingStep("processing")
+    try {
+      const response = await fetch("http://localhost:8000/process_video/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ video_url: videoUrl }),
+      })
+
+      const data: ProcessResponse = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to process video")
+      }
+
+      // Now that processing is complete, fetch the summary
+      await fetchSummary()
+    } catch (error) {
+      console.error("Processing error:", error)
+      setError(error instanceof Error ? error.message : "Failed to process video")
+      setIsLoading(false)
+    }
+  }
+
   const fetchSummary = async () => {
     if (!videoId) {
       setIsLoading(false)
       return
     }
 
-    setIsLoading(true)
+    setProcessingStep("summarizing")
     try {
       const response = await fetch("http://localhost:8000/summarize_video/", {
         method: "POST",
@@ -56,26 +95,27 @@ function App() {
         body: JSON.stringify({ video_id: videoId }),
       })
 
+      const data: SummaryResponse = await response.json()
+
       if (!response.ok) {
-        throw new Error("Failed to fetch summary")
+        throw new Error(data.detail || "Failed to fetch summary")
       }
 
-      const data: SummaryResponse = await response.json()
       setSummary(data.summary)
       setError(null)
     } catch (error) {
-      console.error("Error:", error)
-      setError("Failed to retrieve summary")
+      console.error("Summary error:", error)
+      setError(error instanceof Error ? error.message : "Failed to retrieve summary")
     } finally {
       setIsLoading(false)
     }
   }
 
   useEffect(() => {
-    if (videoId) {
-      fetchSummary()
+    if (videoId && videoUrl) {
+      processVideo()
     }
-  }, [videoId])
+  }, [videoId, videoUrl])
 
   return (
     <div className="w-[400px] h-[500px] bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
@@ -94,7 +134,9 @@ function App() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-[200px] text-slate-400">
               <Loader2 className="h-8 w-8 animate-spin mb-2" />
-              <p className="text-sm">Generating summary...</p>
+              <p className="text-sm">
+                {processingStep === "processing" ? "Processing video..." : "Generating summary..."}
+              </p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center h-[200px] text-slate-400">
@@ -130,5 +172,3 @@ function App() {
 }
 
 export default App
-
-
