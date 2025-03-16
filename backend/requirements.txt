@@ -1,7 +1,0 @@
-langchain
-faiss-cpu
-yt-dlp
-assemblyai
-langchain-google-genai
-python-dotenv
-flask

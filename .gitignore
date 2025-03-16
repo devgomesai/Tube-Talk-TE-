@@ -15,3 +15,6 @@ backend/faiss_index
 backend/yt-talk
 backend/media
 backend/transcripts
+backend/transcripts
+backend/media
+backend/transcripts
