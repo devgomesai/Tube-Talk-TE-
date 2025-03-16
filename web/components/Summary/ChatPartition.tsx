@@ -6,9 +6,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarFallback } from "@/components/ui/avatar";
 import { useSummaryContext } from "./SummaryProvider";
+import Markdown from 'react-markdown';
 
 
-const USE_API = false; // Set to false to use static responses
+const USE_API = true;
 
 // Define the interface for the API response
 interface ChatResponse {
@@ -155,7 +156,7 @@ export default function ChatPartition() {
                   }
                 `}
               >
-                <p className="text-sm">{message.content}</p>
+                <Markdown className="text-sm">{message.content}</Markdown>
               </div>
               {message.role === 'user' && (
                 <Avatar className="w-8 h-8">

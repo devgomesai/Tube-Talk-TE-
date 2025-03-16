@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import QuizDialog from "./Quiz";
 import { useSummaryContext } from "./SummaryProvider";
 
-const USE_API = false;
+const USE_API = true;
 
 const staticSummary = ` 
 ## Video Summary
@@ -69,7 +69,7 @@ export default function VideoSummaryPartition() {
       </header>
       <Button
         onClick={() => setQuizOpen(true)}
-        className="absolute bottom-4 right-4"
+        className="absolute bottom-4 right-4 z-10"
         size="lg"
       >
         Take a Quiz

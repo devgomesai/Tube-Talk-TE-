@@ -10,23 +10,58 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useSummaryContext } from "./SummaryProvider";
 
-const USE_API = false;
+const USE_API = true;
 
-const staticQuiz: QuizQuestion[] = [
+const staticQuiz = [
   {
-    question: "What is the capital of France?",
-    options: ["Paris", "London", "Berlin", "Madrid"],
-    answer: "Paris"
+    question: "What is the key feature highlighted regarding the DJI RS 4 Mini's stabilization?",
+    options: [
+      "It uses a second-generation stabilization algorithm.",
+      "It features improved auto-axis locks for quicker setup.",
+      "It has a significantly reduced payload capacity compared to previous models.",
+      "It utilizes a completely new type of motor technology."
+    ],
+    answer: "It features improved auto-axis locks for quicker setup."
   },
   {
-    question: "What is 2 + 2?",
-    options: ["3", "4", "5", "6"],
-    answer: "4"
+    question: "What is the maximum payload capacity of the DJI RS 4 Mini?",
+    options: [
+      "1 kg",
+      "1.5 kg",
+      "2 kg",
+      "2.5 kg"
+    ],
+    answer: "2 kg"
   },
   {
-    question: "What is the largest planet in our solar system?",
-    options: ["Earth", "Mars", "Jupiter", "Venus"],
-    answer: "Jupiter"
+    question: "Which new shooting mode is introduced in the DJI RS 4 Mini, offering instant motor response to hand movements?",
+    options: [
+      "Dolly Zoom only",
+      "Smooth Follow only",
+      "Responsive Mode",
+      "Timelapse Mode"
+    ],
+    answer: "Responsive Mode"
+  },
+  {
+    question: "The RS 4 Mini includes a new module for automated tracking. How can this module be triggered?",
+    options: [
+      "Only via the DJI app.",
+      "Only via the joystick.",
+      "Via gestures from the subject or a trigger button.",
+      "It is always active and automatically tracks the subject."
+    ],
+    answer: "Via gestures from the subject or a trigger button."
+  },
+  {
+    question: "Besides improved stabilization and new shooting modes, what other significant improvement does the RS 4 Mini offer compared to previous mini-series models?",
+    options: [
+      "A significantly larger payload capacity.",
+      "A built-in microphone for improved audio recording.",
+      "A substantial increase in battery life and charging speed.",
+      "The ability to record in 8K resolution."
+    ],
+    answer: "A substantial increase in battery life and charging speed."
   }
 ];
 
@@ -63,7 +98,25 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
       if (!response.ok) throw new Error("Failed to fetch quiz");
 
       const data = await response.json();
-      setQuiz(data.quiz.quiz);
+
+      // Transform the API response format to match our internal format
+      const transformedQuiz = data.quiz.quiz.map((q: any) => {
+        // Strip the letter prefix (A., B., etc.) from options
+        const options = q.options.map((opt: string) => opt.substring(3).trim());
+
+        // Get the correct answer letter and map it to the actual answer text
+        const answerLetter = q.answer;
+        const answerIndex = answerLetter.charCodeAt(0) - 65; // Convert A to 0, B to 1, etc.
+        const answer = options[answerIndex];
+
+        return {
+          question: q.question,
+          options: options,
+          answer: answer
+        };
+      });
+
+      setQuiz(transformedQuiz);
       setCurrentQuestion(0);
       setScore(0);
       setFinalScore(0);
@@ -71,10 +124,10 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
       setSelectedAnswer('');
       setIsAnswered(false);
     } catch (error) {
-      setQuiz([]);
+      console.error("Error fetching quiz:", error);
+      setQuiz(staticQuiz);
     }
   };
-
 
   const handleSubmit = () => {
     const isCorrect = selectedAnswer === quiz[currentQuestion]?.answer;
@@ -92,14 +145,12 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
         // Store the final score before completing the quiz
         const newScore = isCorrect ? score + 1 : score;
         setFinalScore(newScore);
-        console.log(newScore)
         setQuizCompleted(true);
       }
     }, 1500);
   };
 
   const handleRetakeQuiz = () => {
-    console.log("DEBUG: retake quiz");
     setCurrentQuestion(0);
     setScore(0);
     setFinalScore(0);
@@ -116,7 +167,6 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
 
   useEffect(() => {
     if (open) {
-      console.log("DEBUG: calling quiz");
       setCurrentQuestion(0);
       setScore(0);
       setFinalScore(0);
@@ -130,7 +180,7 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
         setQuiz(staticQuiz);
       }
     }
-  }, [open]);
+  }, [open, videoId]);
 
   const progress = quiz.length > 0 ? ((currentQuestion + 1) / quiz.length) * 100 : 0;
 
