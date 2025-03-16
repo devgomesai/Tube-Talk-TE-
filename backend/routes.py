@@ -346,6 +346,16 @@ def process_video(url):
     if not video_id:
         raise HTTPException(status_code=400, detail="Invalid YouTube URL.")
 
+    # If video is already processed with vectorstore, return success immediately
+    if (video_id in video_data_store and 
+        'vectorstore' in video_data_store[video_id] and 
+        video_data_store[video_id]['vectorstore'] is not None):
+        return {
+            "message": "Video already processed", 
+            "video_title": video_data_store[video_id].get('video_title', 'Unknown Title'),
+            "video_id": video_id
+        }
+
     if video_id not in video_data_store:
         video_data_store[video_id] = {}
 
