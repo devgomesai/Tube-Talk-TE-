@@ -33,9 +33,9 @@ export async function GET(request: NextRequest) {
 
     if (!platform || !videoId) {
       return NextResponse.json(
-        { 
-          status: false, 
-          error: "Missing required parameters: platform and id must be provided" 
+        {
+          status: false,
+          error: "Missing required parameters: platform and id must be provided"
         },
         { status: 400 }
       );
@@ -98,14 +98,14 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error("Quiz generation error:", error);
-    
+
     return NextResponse.json(
       {
         status: false,
         error: error.message || "Internal server error"
       },
-      { 
-        status: error.status || 500 
+      {
+        status: error.status || 500
       }
     );
   }

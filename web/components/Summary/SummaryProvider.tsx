@@ -8,7 +8,7 @@ interface SummaryContextProps {
 
 const SummaryContext = createContext<SummaryContextProps | undefined>(undefined);
 
-export const useSummaryContext = () => {
+export function useSummaryContext() {
   const context = useContext(SummaryContext);
   if (!context) {
     throw new Error('useSummaryContext must be used within a SummaryProvider');

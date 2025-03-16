@@ -9,13 +9,16 @@ import SummarySidebar from "./Sidebar";
 import VideoSummaryPartition from "./VideoSummaryPartition";
 import ChatPartition from "./ChatPartition";
 import summarySidebarData from "@/lib/data/summarySidebarData";
+import { useSummaryContext } from "./SummaryProvider";
+import platformMap from "@/lib/data/platform_map";
+import { useEffect } from "react";
 
 export default function Summary() {
   return (
     <SidebarProvider className="flex h-screen overflow-hidden">
       <SummaryContent />
     </SidebarProvider>
-  )
+  );
 }
 
 function SummaryContent() {

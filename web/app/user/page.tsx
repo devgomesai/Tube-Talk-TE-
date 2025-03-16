@@ -4,6 +4,7 @@ import Dashboard from '@/components/Dashboard';
 import Summary from '@/components/Summary';
 import SummaryProvider from '@/components/Summary/SummaryProvider';
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 enum Params {
   platform = "platform",

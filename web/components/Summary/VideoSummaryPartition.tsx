@@ -3,52 +3,55 @@ import { ModeToggle } from "../theme/mode-toggle";
 import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useSummaryContext } from "./SummaryProvider";
 import { Button } from "@/components/ui/button";
 import Markdown from "react-markdown";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import QuizDialog from "./Quiz";
+import { useSummaryContext } from "./SummaryProvider";
+
+const USE_API = false;
+
+const staticSummary = ` 
+## Video Summary
+
+This is a static summary of the video. It covers key points and provides an overview of the content.
+
+- Point 1: Introduction to the topic.
+- Point 2: Explanation of key concepts.
+- Point 3: Conclusion and takeaways.
+`
+  ;
 
 export default function VideoSummaryPartition() {
-  const { platform, videoId } = useSummaryContext();
-  const [videoSummary, setVideoSummary] = useState(null);
   const [quizOpen, setQuizOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [summary, setSummary] = useState("Loading summary...");
+  const { videoId } = useSummaryContext();
 
   useEffect(() => {
-    const fetchVideoSummary = async () => {
-      if (!videoId) return;
-      
-      setIsLoading(true);
-      try {
-        // Use the correct FastAPI endpoint with form data
-        const formData = new FormData();
-        formData.append('video_id', videoId);
-        
-        const response = await fetch('http://localhost:8000/summarize_video/', {
-          method: 'POST',
-          body: formData
-        });
-        
-        const data = await response.json();
-        console.log("Summary response:", data);
-        
-        if (data.summary) {
-          setVideoSummary(data.summary);
-        } else if (data.detail) {
-          console.error("API error:", data.detail);
-          setVideoSummary(`Error: ${data.detail}`);
-        }
-      } catch (error) {
-        console.error("Error fetching video summary:", error);
-        setVideoSummary("Failed to fetch summary. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (!videoId) return;
 
-    if (videoId) {
-      fetchVideoSummary();
+    async function fetchSummary() {
+      try {
+        const response = await fetch("http://localhost:8000/summarize_video/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ video_id: videoId }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch summary");
+
+        const data = await response.json();
+        setSummary(data.summary);
+      } catch (error) {
+        setSummary("Error loading summary. Please try again.");
+      }
+    }
+
+    // toggle the comment sequence to view the summary
+    if (USE_API) {
+      fetchSummary();
+    } else {
+      setSummary(staticSummary);
     }
   }, [videoId]);
 
@@ -68,25 +71,15 @@ export default function VideoSummaryPartition() {
         onClick={() => setQuizOpen(true)}
         className="absolute bottom-4 right-4"
         size="lg"
-        disabled={isLoading || !videoSummary}
       >
         Take a Quiz
       </Button>
-      <QuizDialog
-        open={quizOpen}
-        onOpenChange={setQuizOpen}
-        platform={platform}
-        videoId={videoId}
-      />
+      <QuizDialog open={quizOpen} onOpenChange={setQuizOpen} />
       <ScrollArea>
         <div className="flex flex-col gap-4 p-4 prose lg:prose-lg text-foreground">
-          {isLoading ? (
-            <div className="text-center py-8">Loading summary...</div>
-          ) : (
-            <Markdown>{videoSummary || "No summary available."}</Markdown>
-          )}
+          <Markdown>{summary}</Markdown>
         </div>
       </ScrollArea>
     </>
-  )
+  );
 }
