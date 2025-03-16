@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Product Recommender",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["*://*.amazon.com/*", "http://localhost:8080/*"]
+}
