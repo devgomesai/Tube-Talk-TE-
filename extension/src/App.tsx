@@ -1,96 +1,134 @@
-import { useState, useEffect } from "react";
-import Markdown from "react-markdown";
+"use client"
+
+import { useState, useEffect } from "react"
+import Markdown from "react-markdown"
+import { Loader2, Youtube, ExternalLink, AlertCircle } from "lucide-react"
 
 interface SummaryResponse {
-  summary: string;
+  summary: string
 }
 
 interface ChromeTab {
-  url?: string;
+  url?: string
 }
 
 declare global {
   interface Window {
-    chrome?: any;
+    chrome?: any
   }
 }
 
 function App() {
-  const [videoId, setVideoId] = useState<string | null>(null);
-  const [summary, setSummary] = useState<string | null>(null);
+  const [videoId, setVideoId] = useState<string | null>(null)
+  const [summary, setSummary] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (typeof window.chrome !== "undefined" && window.chrome.tabs) {
-      window.chrome.tabs.query(
-        { active: true, currentWindow: true },
-        (tabs: ChromeTab[]) => {
-          const url = tabs[0]?.url;
-          if (url) {
-            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-            if (match) {
-              setVideoId(match[1]);
-            } else {
-              setVideoId(null);
-            }
+      window.chrome.tabs.query({ active: true, currentWindow: true }, (tabs: ChromeTab[]) => {
+        const url = tabs[0]?.url
+        if (url) {
+          const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/)
+          if (match) {
+            setVideoId(match[1])
+          } else {
+            setVideoId(null)
+            setIsLoading(false)
+            setError("Not a YouTube video page")
           }
         }
-      );
+      })
     }
-  }, []);
+  }, [])
 
   const fetchSummary = async () => {
     if (!videoId) {
-      setSummary("No valid YouTube video found");
-      return;
+      setIsLoading(false)
+      return
     }
 
+    setIsLoading(true)
     try {
       const response = await fetch("http://localhost:8000/summarize_video/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ video_id: videoId }),
-      });
+      })
 
       if (!response.ok) {
-        throw new Error("Failed to fetch summary");
+        throw new Error("Failed to fetch summary")
       }
 
-      const data: SummaryResponse = await response.json();
-      setSummary(data.summary);
+      const data: SummaryResponse = await response.json()
+      setSummary(data.summary)
+      setError(null)
     } catch (error) {
-      console.error("Error:", error);
-      setSummary("Failed to retrieve summary");
+      console.error("Error:", error)
+      setError("Failed to retrieve summary")
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchSummary();
-  }, [videoId]);
+    if (videoId) {
+      fetchSummary()
+    }
+  }, [videoId])
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-96 h-[30rem] p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">YouTube Video Summary</h2>
-        {videoId ? (
-          <p className="text-gray-700 mb-2">Video ID: <span className="font-mono text-blue-600">{videoId}</span></p>
-        ) : (
-          <p className="text-red-500">No valid YouTube video found</p>
-        )}
-        {summary && (
-          <Markdown>
-            {summary}
-          </Markdown>
-        )}
+    <div className="w-[400px] h-[500px] bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-2 shadow-sm">
+        <Youtube className="h-5 w-5 text-red-600" />
+        <h1 className="text-lg font-semibold text-slate-800">TubeTalk</h1>
+      </header>
+
+      {/* Content */}
+      <main className="flex-1 overflow-hidden p-4">
+        {/* Summary Section */}
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-4 min-h-[280px]">
+          <h2 className="text-sm font-medium text-slate-500 mb-3">Summary</h2>
+
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-[200px] text-slate-400">
+              <Loader2 className="h-8 w-8 animate-spin mb-2" />
+              <p className="text-sm">Generating summary...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center h-[200px] text-slate-400">
+              <AlertCircle className="h-8 w-8 mb-2" />
+              <p className="text-sm">{error}</p>
+            </div>
+          ) : summary ? (
+            <div className="prose prose-sm max-w-none text-slate-700 overflow-auto max-h-[280px] pr-2">
+              <Markdown>{summary}</Markdown>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[200px] text-slate-400">
+              <p className="text-sm">No summary available</p>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="p-4 border-t border-slate-200 bg-white">
         <a
-          href={`http://localhost:3000/user?platform=youtube&id=${videoId}`}
+          href={`http://localhost:3000/user?platform=youtube&id=${videoId || ""}`}
           target="_blank"
-          className="mt-6 block text-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-md transition-colors font-medium"
         >
-          Go to Dashboard
+          View Dashboard
+          <ExternalLink className="h-4 w-4" />
         </a>
-      </div>
+      </footer>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
+
+
