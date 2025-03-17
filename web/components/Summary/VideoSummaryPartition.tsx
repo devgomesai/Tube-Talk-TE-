@@ -19,13 +19,36 @@ This is a static summary of the video. It covers key points and provides an over
 - Point 3: Conclusion and takeaways.
 `;
 
+
+function EmbedVideo({ videoId }: { videoId: string }) {
+  return (
+    <iframe 
+      width="560" 
+      height="315" 
+      src={`https://www.youtube.com/embed/${videoId}`} 
+      title="YouTube video player" 
+      frameBorder="0" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+      referrerPolicy="strict-origin-when-cross-origin" 
+      allowFullScreen
+    >
+    </iframe>
+  )
+}
+
 export default function VideoSummaryPartition() {
   const [quizOpen, setQuizOpen] = useState(false);
   const [summary, setSummary] = useState("Loading summary...");
   const [processingStep, setProcessingStep] = useState<string>("initializing");
   const [isLoading, setIsLoading] = useState(true);
   const { videoId } = useSummaryContext();
-
+  const staticSummary = ` 
+  ## Video Summary
+  This is a static summary of the video. It covers key points and provides an overview of the content.
+  - Point 1: Introduction to the topic.
+  - Point 2: Explanation of key concepts.
+  - Point 3: Conclusion and takeaways.
+  `;
   useEffect(() => {
     if (!videoId) return;
 
@@ -121,7 +144,10 @@ export default function VideoSummaryPartition() {
               </p>
             </div>
           ) : (
+            <>
+            <EmbedVideo videoId={videoId as string}/>
             <Markdown>{summary}</Markdown>
+            </>
           )}
         </div>
       </ScrollArea>

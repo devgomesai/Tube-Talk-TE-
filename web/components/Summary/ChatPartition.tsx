@@ -37,6 +37,8 @@ const getStaticResponse = (query: string): string => {
   return responses[Math.floor(Math.random() * responses.length)];
 };
 
+
+
 export default function ChatPartition() {
   // Toggle this flag to switch between API and static responses
 
