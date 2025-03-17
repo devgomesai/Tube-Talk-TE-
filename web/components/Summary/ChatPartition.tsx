@@ -156,7 +156,7 @@ export default function ChatPartition() {
                   }
                 `}
               >
-                <Markdown className="text-sm">{message.content}</Markdown>
+                <Markdown className="text-lg">{message.content}</Markdown>
               </div>
               {message.role === 'user' && (
                 <Avatar className="w-8 h-8">
@@ -175,7 +175,7 @@ export default function ChatPartition() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about the video..."
-            className="flex-1 px-3 h-12"
+            className="flex-1 px-3 h-12 text-lg"
             disabled={isLoading || (!videoId && USE_API)}
           />
           <Button type="submit" className="h-12 w-12" disabled={isLoading || (!videoId && USE_API)}>

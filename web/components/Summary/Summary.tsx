@@ -15,7 +15,7 @@ import { useEffect } from "react";
 
 export default function Summary() {
   return (
-    <SidebarProvider className="flex h-screen overflow-hidden">
+    <SidebarProvider className="flex h-screen overflow-hidden text-lg">
       <SummaryContent />
     </SidebarProvider>
   );
