@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import QuizDialog from "./Quiz";
 import { useSummaryContext } from "./SummaryProvider";
 import { Loader2 } from "lucide-react";
+import "./VideoSummaryPartition.css"
 
 const USE_API = true;
 const staticSummary = ` 
@@ -146,7 +147,9 @@ export default function VideoSummaryPartition() {
           ) : (
             <>
             <EmbedVideo videoId={videoId as string}/>
+            <p className="text-primary-foreground">
             <Markdown>{summary}</Markdown>
+            </p>
             </>
           )}
         </div>
