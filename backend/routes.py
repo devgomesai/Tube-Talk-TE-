@@ -20,7 +20,6 @@ load_dotenv()
 
 app = FastAPI()
 
-# CORS (Cross-Origin Resource Sharing) middleware to allow requests from web browsers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows all origins (for development, restrict in production)
@@ -31,6 +30,7 @@ app.add_middleware(
 
 # Global state (in-memory, consider a database or cache for production)
 video_data_store: Dict[str, Dict[str, Any]] = {}
+summary_inmem_db: Dict[str, str | list[str | dict]] = {}
 
 # API Keys - read from environment variables
 gemini_api_key = SecretStr(os.getenv("GEMINI_API_KEY", ""))
@@ -276,7 +276,10 @@ You are an AI assistant specialized in answering questions about YouTube videos 
 
 
 # Tool: Summarize YouTube Video (reused and adapted, no status updates)
-def summarize_video(video_id):
+def summarize_video(video_id: str):
+    if summary_inmem_db.get(video_id):
+        return summary_inmem_db[video_id]
+    
     if llm is None:
         raise HTTPException(status_code=500, detail="LLM service not initialized.")
     if (
@@ -308,6 +311,8 @@ Instructions:
 Your summary:
 """
     response = llm.invoke(prompt)
+    summary_inmem_db[video_id] = response.content
+    print(summary_inmem_db)
     return response.content
 
 
