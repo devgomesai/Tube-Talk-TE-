@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -54,10 +54,13 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
   const [score, setScore] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { videoId } = useSummaryContext();
 
   const fetchQuiz = async () => {
     if (!videoId) return;
+    
+    setIsLoading(true);
 
     try {
       const response = await fetch("http://localhost:8000/generate_quiz/", {
@@ -86,6 +89,8 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
     } catch (error) {
       console.error("Error fetching quiz:", error);
       setQuiz(staticQuiz);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -130,6 +135,7 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
       fetchQuiz();
     } else {
       setQuiz(staticQuiz);
+      setIsLoading(false);
     }
   };
 
@@ -141,11 +147,13 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
       setQuizCompleted(false);
       setSelectedAnswer('');
       setIsAnswered(false);
+      setIsLoading(true);
 
       if (USE_API) {
         fetchQuiz();
       } else {
         setQuiz(staticQuiz);
+        setIsLoading(false);
       }
     }
   }, [open, videoId]);
@@ -159,7 +167,12 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
           <DialogTitle>Quiz Challenge</DialogTitle>
         </DialogHeader>
 
-        {quiz.length > 0 && !quizCompleted ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+            <p className="text-lg font-medium">Loading quiz questions...</p>
+          </div>
+        ) : quiz.length > 0 && !quizCompleted ? (
           <div className="space-y-4">
             <div className="flex justify-between text-sm">
               <span>Question {currentQuestion + 1} of {quiz.length}</span>
@@ -199,12 +212,24 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
               ))}
             </RadioGroup>
           </div>
-        ) : (
+        ) : quiz.length > 0 ? (
           <div className="text-center py-6">
             <h2 className="text-2xl font-bold">Quiz Completed!</h2>
             <p className="text-xl">Final Score: {finalScore} out of {quiz.length}</p>
             <Button onClick={handleRetakeQuiz} className="mt-4">
               Retake Quiz
+            </Button>
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <Alert variant="destructive">
+              <AlertTitle>Failed to load quiz</AlertTitle>
+              <AlertDescription>
+                Unable to load quiz questions. Please try again later.
+              </AlertDescription>
+            </Alert>
+            <Button onClick={handleRetakeQuiz} className="mt-4">
+              Try Again
             </Button>
           </div>
         )}
