@@ -29,7 +29,7 @@ const getStaticResponse = (query: string): string => {
     `This video discusses ${query} in detail.`,
     `The main topic related to ${query} appears around the middle of the video.`,
     `The video doesn't specifically mention ${query}, but covers related concepts.`,
-    `I found several references to ${query} throughout the video.`,
+    `I found several references to ${query} throughout thhttps://021c-106-194-240-111.ngrok-free.app/e video.`,
     `The creator explains ${query} with some helpful examples.`
   ];
 
@@ -84,7 +84,7 @@ export default function ChatPartition() {
     if (USE_API) {
       try {
         // Make API request with videoId from context
-        const response = await fetch('http://localhost:8000/chat_with_video/', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_LINK}/chat_with_video/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

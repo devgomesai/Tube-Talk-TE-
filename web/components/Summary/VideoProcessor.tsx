@@ -32,7 +32,7 @@ export default function VideoProcessor({ onProcessComplete }) {
 
     try {
       // Process video first
-      const processResponse = await fetch("http://localhost:8000/process_video/", {
+      const processResponse = await fetch(`${process.env.NEXT_PUBLIC_API_LINK}/process_video/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ video_url: videoUrl }),
