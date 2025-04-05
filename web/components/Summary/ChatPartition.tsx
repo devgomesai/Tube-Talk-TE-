@@ -84,7 +84,7 @@ export default function ChatPartition() {
     if (USE_API) {
       try {
         // Make API request with videoId from context
-        const response = await fetch('http://localhost:8000/chat_with_video/', {
+        const response = await fetch('http://34.238.157.218:8000/chat_with_video/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

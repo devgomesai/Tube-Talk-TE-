@@ -23,14 +23,14 @@ This is a static summary of the video. It covers key points and provides an over
 
 function EmbedVideo({ videoId }: { videoId: string }) {
   return (
-    <iframe 
-      width="560" 
-      height="315" 
-      src={`https://www.youtube.com/embed/${videoId}`} 
-      title="YouTube video player" 
-      frameBorder="0" 
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-      referrerPolicy="strict-origin-when-cross-origin" 
+    <iframe
+      width="560"
+      height="315"
+      src={`https://www.youtube.com/embed/${videoId}`}
+      title="YouTube video player"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerPolicy="strict-origin-when-cross-origin"
       allowFullScreen
     >
     </iframe>
@@ -61,7 +61,7 @@ export default function VideoSummaryPartition() {
         const videoUrl = `https://youtube.com/watch?v=${videoId}`;
 
         // First, process the video
-        const processResponse = await fetch("http://localhost:8000/process_video/", {
+        const processResponse = await fetch("http://34.238.157.218:8000/process_video/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ video_url: videoUrl }),
@@ -84,7 +84,7 @@ export default function VideoSummaryPartition() {
       try {
         setProcessingStep("summarizing");
 
-        const response = await fetch("http://localhost:8000/summarize_video/", {
+        const response = await fetch("http://34.238.157.218:8000/summarize_video/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ video_id: videoId }),
@@ -146,10 +146,10 @@ export default function VideoSummaryPartition() {
             </div>
           ) : (
             <>
-            <EmbedVideo videoId={videoId as string}/>
-            <p className="text-primary-foreground">
-            <Markdown>{summary}</Markdown>
-            </p>
+              <EmbedVideo videoId={videoId as string} />
+              <p className="text-primary-foreground">
+                <Markdown>{summary}</Markdown>
+              </p>
             </>
           )}
         </div>

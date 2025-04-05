@@ -59,11 +59,11 @@ export default function QuizDialog({ open, onOpenChange }: QuizDialogProps) {
 
   const fetchQuiz = async () => {
     if (!videoId) return;
-    
+
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/generate_quiz/", {
+      const response = await fetch("http://34.238.157.218:8000/generate_quiz/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ video_id: videoId }),
