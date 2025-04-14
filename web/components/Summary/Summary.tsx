@@ -24,19 +24,12 @@ export default function Summary() {
 function SummaryContent() {
   const { isMobile } = useSidebar()
   return (
-    <>
+    <div className="flex flex-col h-full md:flex-row w-full">
 
-      <SummarySidebar />
-      <SidebarInset className="flex flex-col min-h-0">
+      <div className="flex-1">
         <VideoSummaryPartition />
-        {isMobile && <ChatPartition />}
-      </SidebarInset>
-
-      {!isMobile && (
-        <SidebarInset className="flex flex-col min-h-0">
-          < ChatPartition />
-        </SidebarInset>
-      )}
-    </>
+      </div>
+      < ChatPartition />
+    </div>
   )
 }

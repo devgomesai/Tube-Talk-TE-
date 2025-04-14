@@ -9,9 +9,10 @@ import { useSummaryContext } from "./SummaryProvider";
 import Markdown from 'react-markdown';
 import pb from '@/lib/db/pocket_base.config';
 import { useRouter } from 'next/navigation';
+import { ModeToggle } from '../theme/mode-toggle';
 
 
-const USE_API = false;
+const USE_API = true;
 
 // Define the interface for the API response
 interface ChatResponse {
@@ -126,22 +127,14 @@ export default function ChatPartition() {
     }
   };
 
-  const handleLogout = () => {
-    pb.authStore.clear(); // Clear the auth token and user data
-    // The useEffect subscription will automatically update isLoggedIn state
-    router.push("/"); // Redirect to home page after logout
-    // Or redirect to login page: router.push('/auth/login');
-  };
 
   return (
     <div className="flex flex-col h-full bg-background rounded-lg border">
       <div className="border-b py-3 px-6 flex justify-between items-center">
         <h2 className="text-lg font-semibold">Video Chat Assistant</h2>
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={handleLogout} className="flex bg-background text-primary-foreground hover:bg-primary/90 py-2 px-3 sm:px-4 rounded-md items-center gap-1 sm:gap-2 text-sm sm:text-base">
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <ModeToggle />
+
         </div>
       </div>
 

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useSummaryContext } from "./SummaryProvider";
 import pb from '@/lib/db/pocket_base.config'; // <-- 1. Import PocketBase instance
 
-const USE_API = false; // Keep your flag for fetching quiz data
+const USE_API = true; // Keep your flag for fetching quiz data
 
 const staticQuiz = [
   {
