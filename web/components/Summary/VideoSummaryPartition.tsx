@@ -8,10 +8,12 @@ import Markdown from "react-markdown";
 import { useState, useEffect } from "react";
 import QuizDialog from "./Quiz";
 import { useSummaryContext } from "./SummaryProvider";
-import { Loader2 } from "lucide-react";
+import { ChevronRight, Home, Loader2 } from "lucide-react";
 import "./VideoSummaryPartition.css"
+import { ChevronLeftIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
 
-const USE_API = true;
+const USE_API = false;
 const staticSummary = ` 
 ## Video Summary
 This is a static summary of the video. It covers key points and provides an overview of the content.
@@ -118,7 +120,13 @@ export default function VideoSummaryPartition() {
       <header className="flex h-16 shrink-0 items-center gap-2">
         <div className="flex justify-between w-full items-center px-4">
           <div className="flex items-center gap-2">
-            <SidebarTrigger className="-ml-1" />
+            <Link
+              href="/"
+
+              className="flex items-center gap-2">
+              <ChevronLeftIcon className="h-4 w-4" />
+              Home
+            </Link>
             <Separator orientation="vertical" className="mr-2 h-4" />
             <h1 className="text-2xl font-bold">Summary</h1>
           </div>

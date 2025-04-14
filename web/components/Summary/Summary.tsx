@@ -25,8 +25,8 @@ function SummaryContent() {
   const { isMobile } = useSidebar()
   return (
     <>
-      <SummarySidebar />
 
+      <SummarySidebar />
       <SidebarInset className="flex flex-col min-h-0">
         <VideoSummaryPartition />
         {isMobile && <ChatPartition />}
@@ -34,7 +34,7 @@ function SummaryContent() {
 
       {!isMobile && (
         <SidebarInset className="flex flex-col min-h-0">
-          <ChatPartition />
+          < ChatPartition />
         </SidebarInset>
       )}
     </>

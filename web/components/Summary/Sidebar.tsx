@@ -268,17 +268,17 @@ const data = {
 export default function SummarySidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r-0" {...props} collapsible="icon" variant="inset">
-      <SidebarHeader className="bg-background rounded-lg p-2 mb-2">
-        <Nav items={data.navMain} />
-      </SidebarHeader>
-      <SidebarContent className="no-scrollbar">
-        <PinnedChats pinned={data.pinned} />
-        <ChatHistory chatHistory={data.history} />
-      </SidebarContent>
-      <SidebarRail />
-      <SidebarFooter>
-        <UserMenu name="John Doe" email="john@example.com" avatar="/next.png" />
-      </SidebarFooter>
+      {/* <SidebarHeader className="bg-background rounded-lg p-2 mb-2"> */}
+      {/*   <Nav items={data.navMain} /> */}
+      {/* </SidebarHeader> */}
+      {/* <SidebarContent className="no-scrollbar"> */}
+      {/*   <PinnedChats pinned={data.pinned} /> */}
+      {/*   <ChatHistory chatHistory={data.history} /> */}
+      {/* </SidebarContent> */}
+      {/* <SidebarRail /> */}
+      {/* <SidebarFooter> */}
+      {/*   <UserMenu name="John Doe" email="john@example.com" avatar="/next.png" /> */}
+      {/* </SidebarFooter> */}
     </Sidebar>
   )
 }

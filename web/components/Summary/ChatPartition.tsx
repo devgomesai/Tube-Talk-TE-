@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect, FormEvent } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { LogOut, Send } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarFallback } from "@/components/ui/avatar";
 import { useSummaryContext } from "./SummaryProvider";
 import Markdown from 'react-markdown';
+import pb from '@/lib/db/pocket_base.config';
+import { useRouter } from 'next/navigation';
 
 
-const USE_API = true;
+const USE_API = false;
 
 // Define the interface for the API response
 interface ChatResponse {
@@ -49,6 +51,7 @@ export default function ChatPartition() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -123,17 +126,22 @@ export default function ChatPartition() {
     }
   };
 
+  const handleLogout = () => {
+    pb.authStore.clear(); // Clear the auth token and user data
+    // The useEffect subscription will automatically update isLoggedIn state
+    router.push("/"); // Redirect to home page after logout
+    // Or redirect to login page: router.push('/auth/login');
+  };
+
   return (
     <div className="flex flex-col h-full bg-background rounded-lg border">
-      <div className="border-b py-3 px-6">
+      <div className="border-b py-3 px-6 flex justify-between items-center">
         <h2 className="text-lg font-semibold">Video Chat Assistant</h2>
         <div className="flex justify-between items-center">
-          <p className="text-xs text-muted-foreground">
-            {videoId ? `Video ID: ${videoId}` : 'No video selected'}
-          </p>
-          <p className="text-xs font-medium">
-            Mode: {USE_API ? 'API' : 'Static'}
-          </p>
+          <Button variant="outline" onClick={handleLogout} className="flex bg-background text-primary-foreground hover:bg-primary/90 py-2 px-3 sm:px-4 rounded-md items-center gap-1 sm:gap-2 text-sm sm:text-base">
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
         </div>
       </div>
 
