@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import pb from "@/lib/db/pocket_base.config";
 import { redirect } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type LoginFormInputs = {
   email: string;
@@ -15,6 +16,7 @@ type LoginFormInputs = {
 };
 
 export function LoginFormDemo() {
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -29,7 +31,7 @@ export function LoginFormDemo() {
       console.log("User logged in:", authData);
       // Redirect or handle successful login
       setTimeout(() => {
-        window.location.replace("/user")
+        window.location.replace("/")
       }, 1000)
     } catch (error: any) {
       setErrorMessage(error.message || "An error occurred during login.");
@@ -38,9 +40,9 @@ export function LoginFormDemo() {
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
-      <div className="flex items-center mb-4 cursor-pointer" onClick={() => window.history.back()}>
+      <div className="flex items-center mb-4 cursor-pointer" onClick={() => router.push("/")}>
         <ChevronLeft className="h-6 w-6 text-neutral-800 dark:text-neutral-300" />
-        <span className="text-neutral-700 dark:text-neutral-300 text-sm">Back</span>
+        <span className="text-neutral-700 dark:text-neutral-300 text-sm">Home</span>
       </div>
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
         Sign In to <span className="text-primary">TubeTalk</span>

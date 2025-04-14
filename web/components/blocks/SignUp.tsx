@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import pb from "@/lib/db/pocket_base.config";
+import { useRouter } from "next/navigation";
 
 type FormData = {
   username: string;
@@ -16,6 +17,7 @@ type FormData = {
 };
 
 export function SignupFormDemo() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -75,7 +77,7 @@ export function SignupFormDemo() {
       setSuccess("Signup successful! Redirecting...");
       console.log(4);
       setTimeout(() => {
-        window.location.href = "/user"; // Redirect to login page after success
+        window.location.href = "/"; // Redirect to login page after success
         console.log(5);
       }, 2000);
     } catch (err: any) {
@@ -88,9 +90,9 @@ export function SignupFormDemo() {
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
-      <div className="flex items-center mb-4 cursor-pointer" onClick={() => window.history.back()}>
+      <div className="flex items-center mb-4 cursor-pointer" onClick={() => router.push("/")}>
         <ChevronLeft className="h-6 w-6 text-neutral-800 dark:text-neutral-300" />
-        <span className="text-neutral-700 dark:text-neutral-300 text-sm">Back</span>
+        <span className="text-neutral-700 dark:text-neutral-300 text-sm">Home</span>
       </div>
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
         Sign Up to <span className="text-primary">TubeTalk</span>
