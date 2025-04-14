@@ -157,7 +157,7 @@ export default function VideoSummaryPartition() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full"> {/* Ensure component takes full height if needed */}
+    <div className="flex flex-col h-full w-full min-w-3/4"> {/* Ensure component takes full height if needed */}
       {/* Header */}
       <header className="flex h-16 shrink-0 items-center border-b px-4 md:px-6 sticky top-0 bg-background/95 backdrop-blur z-10">
         <div className="flex justify-between w-full">

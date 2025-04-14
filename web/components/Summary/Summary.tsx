@@ -26,10 +26,13 @@ function SummaryContent() {
   return (
     <div className="flex flex-col h-full md:flex-row w-full">
 
-      <div className="flex-1">
+
+      <div className="flex-1 min-w-3/4">
         <VideoSummaryPartition />
       </div>
-      < ChatPartition />
+      <div className="flex-1 w-full md:max-w-1/4">
+        < ChatPartition />
+      </div>
     </div>
   )
 }
