@@ -50,6 +50,7 @@ export function SignupFormDemo() {
       emailVisibility: true, // Often needed by PocketBase, adjust if necessary
       password: data.password,
       passwordConfirm: data.confirmPassword,
+      role: "student"
       // Add any other default fields you need for your 'users' collection
       // e.g., name: data.username
     };
