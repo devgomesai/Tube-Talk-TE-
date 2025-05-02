@@ -15,8 +15,8 @@ export default function ExplanationVideo() {
             <HeroVideoDialog
               className="w-full aspect-video"
               animationStyle="from-center"
-              videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
-              thumbnailSrc="https://startup-template-sage.vercel.app/hero-light.png"
+              videoSrc="https://www.youtube.com/embed/A9EUYPAzVsQ?si=Bsf9EynzLRGWPv2v"
+              thumbnailSrc="/landing.png"
               thumbnailAlt="Hero Video"
             />
           </div>
