@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Label } from "../ui/label";
-import { Input } from "../aceternity/input";
-import { cn } from "@/lib/utils";
+import { Label } from "../ui/label"; // Assuming these imports are correct
+import { Input } from "../aceternity/input"; // Assuming these imports are correct
+import { cn } from "@/lib/utils"; // Assuming this import is correct
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import pb from "@/lib/db/pocket_base.config";
+import pb from "@/lib/db/pocket_base.config"; // Assuming this import is correct
 import { useRouter } from "next/navigation";
 
 type FormData = {
@@ -23,70 +23,91 @@ export function SignupFormDemo() {
     handleSubmit,
     formState: { errors },
     watch,
-    setError,
-  } = useForm<FormData>();
-  console.log(1);
-  console.log(pb);
-  const [error, setErrorState] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+    // setError is removed as react-hook-form handles field errors automatically now
+  } = useForm<FormData>({
+    mode: "onBlur", // Validate fields when they lose focus for better UX
+  });
 
-  console.log(2);
+  // State for general API errors (not field-specific validation errors)
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add loading state
+
+  // Watch password to validate confirmPassword
+  const password = watch("password");
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    console.log(3);
-    // Check if the passwords match before submitting
-    if (data.password !== data.confirmPassword) {
-      console.log(4);
-      setError("confirmPassword", {
-        type: "manual",
-        message: "Passwords do not match",
-      });
-      return;
-    }
-    console.log(5);
+    setIsSubmitting(true); // Set loading state
+    setApiError(null); // Clear previous API errors
+    setSuccess(null);  // Clear previous success messages
 
-    // Validate email format using a regex
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    console.log(6);
-    if (!emailRegex.test(data.email)) {
-      setError("email", {
-        type: "manual",
-        message: "Invalid email address",
-      });
-      return;
-    }
+    // Note: Password match and email format validation are now handled by react-hook-form rules below.
+    // No need for manual checks here.
 
-    console.log(2);
-    // Prepare the data for user creation
     const userData = {
       username: data.username,
       email: data.email,
+      emailVisibility: true, // Often needed by PocketBase, adjust if necessary
       password: data.password,
       passwordConfirm: data.confirmPassword,
+      // Add any other default fields you need for your 'users' collection
+      // e.g., name: data.username
     };
 
     try {
-      console.log(1);
-      setErrorState(null); // Clear previous errors
-      console.log(2);
-
-      // Create user in PocketBase
+      // 1. Create the user in PocketBase
+      console.log("Attempting to create user:", userData.username);
       const record = await pb.collection("users").create(userData);
-      console.log(3);
+      console.log("User created successfully:", record.id);
 
-      setSuccess("Signup successful! Redirecting...");
-      console.log(4);
+      // 2. Log the user in immediately after creation
+      console.log("Attempting to log in user:", data.email);
+      await pb.collection("users").authWithPassword(data.email, data.password);
+      console.log("User logged in successfully.");
+      // PocketBase JS SDK automatically stores the auth token in pb.authStore
+
+      setSuccess("Signup successful! Logging in and redirecting...");
+
+      // 3. Redirect after a short delay
       setTimeout(() => {
-        window.location.href = "/"; // Redirect to login page after success
-        console.log(5);
+        // Use router.push for client-side navigation in Next.js
+        router.push("/"); // Redirect to home page (or dashboard) after login
+        console.log("Redirecting to /");
       }, 2000);
+
     } catch (err: any) {
-      setErrorState(err.message || "Signup failed. Please try again.");
+      console.error("Signup or Login failed:", err);
+      // Provide a user-friendly error message
+      // PocketBase often returns errors in err.data.data or err.message
+      const pbError = err?.data?.data;
+      let errorMessage = "Signup failed. Please try again."; // Default message
+
+      if (pbError) {
+        // Check for specific PocketBase validation errors
+        const fieldErrors = Object.keys(pbError);
+        if (fieldErrors.length > 0) {
+          // Example: Prioritize username or email errors if they exist
+          if (pbError.username) {
+            errorMessage = `Username error: ${pbError.username.message}`;
+          } else if (pbError.email) {
+            errorMessage = `Email error: ${pbError.email.message}`;
+          } else {
+            // Generic message from the first field error found
+            errorMessage = `${fieldErrors[0]}: ${pbError[fieldErrors[0]].message}`;
+          }
+        } else if (err.message) {
+          errorMessage = err.message; // Use generic message if no field errors
+        }
+      } else if (err.message) {
+        errorMessage = err.message; // Fallback to generic error message
+      }
+
+      setApiError(errorMessage);
+      setIsSubmitting(false); // Reset loading state on error
     }
+    // No need to set isSubmitting(false) on success because of the redirect
   };
 
-  // Watch password to check if confirm password matches
-  const password = watch("password");
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
@@ -95,7 +116,7 @@ export function SignupFormDemo() {
         <span className="text-neutral-700 dark:text-neutral-300 text-sm">Home</span>
       </div>
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
-        Sign Up to <span className="text-primary">TubeTalk</span>
+        Sign Up to <span className="text-primary">TubeTalk</span> {/* Adjust 'TubeTalk' and 'primary' class if needed */}
       </h2>
 
       <form className="my-8" onSubmit={handleSubmit(onSubmit)}>
@@ -104,9 +125,15 @@ export function SignupFormDemo() {
           <Label htmlFor="username">Username</Label>
           <Input
             id="username"
-            placeholder="Enter your username"
+            placeholder="your_unique_username"
             type="text"
-            {...register("username", { required: "Username is required" })}
+            {...register("username", {
+              required: "Username is required",
+              minLength: { value: 3, message: "Username must be at least 3 characters" },
+              // Add pattern if you have specific username rules (e.g., alphanumeric)
+              // pattern: { value: /^[a-zA-Z0-9_]+$/, message: "Username can only contain letters, numbers, and underscores" }
+            })}
+            disabled={isSubmitting} // Disable input while submitting
           />
           {errors.username && <ErrorText message={errors.username.message} />}
         </LabelInputContainer>
@@ -116,15 +143,17 @@ export function SignupFormDemo() {
           <Label htmlFor="email">Email Address</Label>
           <Input
             id="email"
-            placeholder="Enter your email"
+            placeholder="you@example.com"
             type="email"
             {...register("email", {
               required: "Email is required",
               pattern: {
-                value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                // Standard robust email regex
+                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
                 message: "Enter a valid email address",
               },
             })}
+            disabled={isSubmitting}
           />
           {errors.email && <ErrorText message={errors.email.message} />}
         </LabelInputContainer>
@@ -138,8 +167,10 @@ export function SignupFormDemo() {
             type="password"
             {...register("password", {
               required: "Password is required",
-              minLength: { value: 6, message: "Password must be at least 6 characters long" },
+              minLength: { value: 8, message: "Password must be at least 8 characters long" }, // PocketBase default is 8
+              // You might want to add more complex password requirements here using a pattern
             })}
+            disabled={isSubmitting}
           />
           {errors.password && <ErrorText message={errors.password.message} />}
         </LabelInputContainer>
@@ -154,23 +185,28 @@ export function SignupFormDemo() {
             {...register("confirmPassword", {
               required: "Please confirm your password",
               validate: (value) =>
-                value === password || "Passwords do not match",
+                value === password || "Passwords do not match", // Validation depends on the watched 'password'
             })}
+            disabled={isSubmitting}
           />
           {errors.confirmPassword && (
             <ErrorText message={errors.confirmPassword.message} />
           )}
         </LabelInputContainer>
 
-        {/* Display Errors */}
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {/* Display API Errors and Success Messages */}
+        {apiError && <p className="text-red-500 text-sm mb-4">{apiError}</p>}
         {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
 
         <button
-          className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+          className={cn(
+            "bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]",
+            "disabled:opacity-50 disabled:cursor-not-allowed" // Style for disabled state
+          )}
           type="submit"
+          disabled={isSubmitting} // Disable button while submitting
         >
-          Sign up &rarr;
+          {isSubmitting ? "Signing up..." : "Sign up"} &rarr;
           <BottomGradient />
         </button>
 
@@ -178,7 +214,7 @@ export function SignupFormDemo() {
 
         <p className="text-sm text-center">
           Already have an account?{" "}
-          <Link href="/auth/login" className="text-primary">
+          <Link href="/auth/login" className="text-primary hover:underline"> {/* Adjust '/auth/login' path if needed */}
             Login
           </Link>
         </p>
@@ -187,7 +223,7 @@ export function SignupFormDemo() {
   );
 }
 
-// Helper Components
+// Helper Components (Keep these as they are)
 const BottomGradient = () => {
   return (
     <>
@@ -214,4 +250,3 @@ const LabelInputContainer = ({
 const ErrorText = ({ message }: { message?: string }) => (
   <span className="text-red-500 text-sm">{message}</span>
 );
-

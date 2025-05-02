@@ -84,17 +84,17 @@ export default function Navbar() {
           {/* Conditional Auth Button */}
           {isLoggedIn ? (
             // Show Logout button if logged in
-            <Button variant="outline" onClick={handleLogout} className="flex bg-background text-primary-foreground hover:bg-primary/90 py-2 px-3 sm:px-4 rounded-md items-center gap-1 sm:gap-2 text-sm sm:text-base">
+            <Button variant="outline" onClick={handleLogout} className="flex bg-background hover:bg-primary/90 py-2 px-3 sm:px-4 rounded-md items-center gap-1 sm:gap-2 text-sm sm:text-base">
               <LogOut className="h-4 w-4 mr-2" />
               Logout
             </Button>
           ) : (
             // Show Sign Up link if logged out
             <Link
-              href="/auth" // Link to your signup page
+              href="/auth/login" // Link to your signup page
               className="flex bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-3 sm:px-4 rounded-md items-center gap-1 sm:gap-2 text-sm sm:text-base" // Adjusted padding/gap for responsiveness
             >
-              Sign Up
+              Sign In
               <ArrowRight className="h-4 w-4" />
             </Link>
           )}
