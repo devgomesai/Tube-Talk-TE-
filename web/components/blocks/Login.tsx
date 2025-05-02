@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import pb from "@/lib/db/pocket_base.config";
-import { redirect } from "next/navigation";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
