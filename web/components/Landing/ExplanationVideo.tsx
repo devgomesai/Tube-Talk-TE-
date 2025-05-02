@@ -15,7 +15,8 @@ export default function ExplanationVideo() {
             <HeroVideoDialog
               className="w-full aspect-video"
               animationStyle="from-center"
-              videoSrc="https://www.youtube.com/embed/A9EUYPAzVsQ?si=Bsf9EynzLRGWPv2v"
+              videoSrc="https://www.youtube.com/embed/bg-2g-0doLw?si=USXJKXhSzHnI8An6"
+
               thumbnailSrc="/landing.png"
               thumbnailAlt="Hero Video"
             />
