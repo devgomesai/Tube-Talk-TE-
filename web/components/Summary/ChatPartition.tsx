@@ -1,14 +1,12 @@
 import React, { useState, useRef, useEffect, FormEvent } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LogOut, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarFallback } from "@/components/ui/avatar";
 import { useSummaryContext } from "./SummaryProvider";
 import Markdown from 'react-markdown';
-import pb from '@/lib/db/pocket_base.config';
-import { useRouter } from 'next/navigation';
 import { ModeToggle } from '../theme/mode-toggle';
 
 
@@ -32,7 +30,7 @@ const getStaticResponse = (query: string): string => {
     `This video discusses ${query} in detail.`,
     `The main topic related to ${query} appears around the middle of the video.`,
     `The video doesn't specifically mention ${query}, but covers related concepts.`,
-    `I found several references to ${query} throughout thhttps://021c-106-194-240-111.ngrok-free.app/e video.`,
+    `I found several references to ${query} throughout the video.`, // Fixed typo in URL portion
     `The creator explains ${query} with some helpful examples.`
   ];
 
@@ -45,14 +43,14 @@ const getStaticResponse = (query: string): string => {
 export default function ChatPartition() {
   // Toggle this flag to switch between API and static responses
 
+  // Assume useSummaryContext provides videoId: string | null
   const { videoId } = useSummaryContext(); // Get videoId from context
   const [messages, setMessages] = useState<Message[]>([
     { role: 'ai', content: 'Hello! Ask a question about the current video.' }
   ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [input, setInput] = useState<string>(''); // Explicitly typed input
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Explicitly typed isLoading
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -65,53 +63,59 @@ export default function ChatPartition() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    const trimmedInput = input.trim(); // Trim input once
+    if (!trimmedInput) return;
 
-    // Check if videoId is null
+    // Check if videoId is null or undefined
     if (!videoId) {
       setMessages(prev => [
         ...prev,
-        { role: 'user', content: input.trim() },
+        { role: 'user', content: trimmedInput },
         { role: 'ai', content: 'No video is currently selected. Please select a video first.' }
       ]);
       setInput('');
       return;
     }
 
-    const userMessage = { role: 'user', content: input.trim() };
+    const userMessage: Message = { role: 'user', content: trimmedInput }; // Explicitly typed userMessage
 
     // Add user message immediately
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    setInput(''); // Clear input after adding user message
     setIsLoading(true);
 
     if (USE_API) {
       try {
         // Make API request with videoId from context
+        // process.env.NEXT_PUBLIC_API_LINK should be typed in a global d.ts file
+        // or handled by Next.js environment typing.
+        // Assuming videoId is string at this point due to the check above.
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_LINK}/chat_with_video/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            video_id: videoId,
-            query: input.trim()
+            video_id: videoId, // videoId is guaranteed to be string here
+            query: trimmedInput
           }),
         });
 
         if (!response.ok) {
-          throw new Error('API request failed');
+          // Attempt to read error body if available
+          const errorBody = await response.text().catch(() => 'Unknown error');
+          throw new Error(`API request failed with status ${response.status}: ${errorBody}`);
         }
 
         const data: ChatResponse = await response.json();
 
         // Add AI response
         setMessages(prev => [...prev, { role: 'ai', content: data.answer }]);
-      } catch (error) {
+      } catch (error: any) { // Explicitly type error as any or more specific
         // Handle API error
         setMessages(prev => [
           ...prev,
-          { role: 'ai', content: 'Sorry, there was an error processing your request. Please try again.' }
+          { role: 'ai', content: `Sorry, there was an error processing your request: ${(error as Error).message}. Please try again.` } // Display error message
         ]);
         console.error('Error fetching from chat API:', error);
       } finally {
@@ -120,7 +124,7 @@ export default function ChatPartition() {
     } else {
       // Use static responses instead of API
       setTimeout(() => {
-        const staticResponse = getStaticResponse(input.trim());
+        const staticResponse = getStaticResponse(trimmedInput); // Use trimmedInput
         setMessages(prev => [...prev, { role: 'ai', content: staticResponse }]);
         setIsLoading(false);
       }, 500); // Add a small delay to simulate API call
@@ -151,8 +155,7 @@ export default function ChatPartition() {
                 </Avatar>
               )}
               <div
-                className={`
-                  max-w-[80%] rounded-lg px-4 py-2
+                className={`max-w-[80%] rounded-lg px-4 py-2
                   ${message.role === 'user'
                     ? 'bg-primary text-primary-foreground ml-4'
                     : 'bg-muted mr-4'
@@ -179,9 +182,9 @@ export default function ChatPartition() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about the video..."
             className="flex-1 px-3 h-12 text-lg"
-            disabled={isLoading || (!videoId && USE_API)}
+            disabled={isLoading || (!videoId && USE_API)} // Disable if no videoId and using API
           />
-          <Button type="submit" className="h-12 w-12" disabled={isLoading || (!videoId && USE_API)}>
+          <Button type="submit" className="h-12 w-12" disabled={isLoading || (!videoId && USE_API) || !input.trim()}> {/* Disable if input is empty */}
             <Send className="h-4 w-4" />
           </Button>
         </form>

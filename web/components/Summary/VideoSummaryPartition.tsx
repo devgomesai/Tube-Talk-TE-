@@ -213,7 +213,7 @@ export default function VideoSummaryPartition() {
               </div>
 
               {/* Quiz Button - Placed after content */}
-              <div className="mt-6 flex justify-center">
+              <div className="mt-6 flex justify-center absolute right-4 bottom-4">
                 <Button
                   onClick={() => setQuizOpen(true)}
                   size="lg"
