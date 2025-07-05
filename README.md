@@ -18,6 +18,7 @@ Whether you're a student, educator, researcher, or lifelong learner, TubeTalk he
 
 - [Mark Lopes](https://github.com/MarkLopes11)
 - [Jonathan Gomes](https://github.com/gomesjonathan99)
+- [Vivian Ludrick](https://github.com/vivalchemy)
 
 ## ✨ Features
 
